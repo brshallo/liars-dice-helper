@@ -81,7 +81,7 @@ export function NewGameButton(): JSX.Element {
         >
           <div className="newgame">
             <Stepper label="Players" value={players} min={MIN_PLAYERS} max={MAX_PLAYERS} onChange={setPlayers} />
-            <Stepper label="Dice each" value={dice} min={1} max={6} onChange={setDice} />
+            <Stepper label="Dice each" value={dice} min={1} max={10} onChange={setDice} />
 
             <div className="variant-field">
               <span className="stepper-label">Variant</span>

@@ -184,6 +184,14 @@
   align-self: baseline;
   min-width: 0;
 }
+/* The bid-cell row is two lines tall (quantity over %), so centre its label against
+   the whole cell rather than baselining it to the top. */
+.info-key li > .info-bidcell {
+  align-self: center;
+}
+.info-bidcell + .info-key-text {
+  align-self: center;
+}
 
 /* Icon hangs to the left; the italic text wraps as a block beside it. Its indent is
    smaller than the key list above (it's a tip, not a key entry). */
