@@ -34,7 +34,7 @@ export function YourDice(): JSX.Element {
           </button>
         )}
       </div>
-      <p className="muted hint">Enter what you're holding to sharpen the odds (optional).</p>
+      <p className="muted hint">Enter yours to sharpen the odds (optional).</p>
       <div className="face-steppers">
         {FACES.map((face) => {
           const count = game.heldByFace[face]

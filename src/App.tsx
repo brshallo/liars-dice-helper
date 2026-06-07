@@ -4,7 +4,7 @@ import type { Bid } from './lib/types'
 import { useGame, useGameDispatch } from './state/GameContext'
 import { derivePanel, totalDice } from './state/selectors'
 import { PlayerTable } from './components/PlayerTable'
-import { SetupBar, YourDice } from './components/Controls'
+import { NewGameButton, YourDice } from './components/Controls'
 import { ProbabilityPanel } from './components/ProbabilityPanel'
 
 function App() {
@@ -17,23 +17,39 @@ function App() {
 
   const onAdjustDice = (id: string, delta: number) =>
     dispatch({ type: 'ADJUST_DICE', id, delta })
-  const onSelectBid = (bid: Bid) => dispatch({ type: 'SET_BID', bid })
+  const onRename = (id: string, name: string) => dispatch({ type: 'RENAME_PLAYER', id, name })
+  const onSelectBid = (bid: Bid | null) => dispatch({ type: 'SET_BID', bid })
+
+  const isWild = game.variant === 'ones-wild'
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Liar&apos;s Dice Helper</h1>
-        <SetupBar />
+        <div className="app-title">
+          <h1>Liar&apos;s Dice Helper</h1>
+          <button
+            type="button"
+            className={`variant-badge${isWild ? ' is-wild' : ''}`}
+            onClick={() => dispatch({ type: 'TOGGLE_VARIANT' })}
+            aria-pressed={isWild}
+            title="Tap to toggle 1s wild"
+          >
+            {isWild ? '1s wild' : 'No wilds'}
+          </button>
+        </div>
+        <NewGameButton />
       </header>
 
       <main className="app-main">
-        <div className="col col-table">
-          <PlayerTable players={game.players} totalDice={total} onAdjustDice={onAdjustDice} />
-          <YourDice />
-        </div>
-        <div className="col col-panel">
-          <ProbabilityPanel panel={panel} onSelectBid={onSelectBid} />
-        </div>
+        {/* Probabilities first — the thing you check most during play. */}
+        <ProbabilityPanel panel={panel} onSelectBid={onSelectBid} />
+        <PlayerTable
+          players={game.players}
+          totalDice={total}
+          onAdjustDice={onAdjustDice}
+          onRename={onRename}
+        />
+        <YourDice />
       </main>
     </div>
   )

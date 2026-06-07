@@ -1,26 +1,31 @@
 .pt {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 8px;
   width: 100%;
 }
 
-/* The oval "felt". Square-ish aspect keeps the ellipse geometry stable as it scales. */
+/* The felt is a container, so seats + text can size in cqmin (a % of the felt's
+   smaller side). That keeps everything proportional whether the felt is a 320px
+   phone column or a 480px desktop pane — no JS measuring needed. */
 .pt-felt {
   position: relative;
   width: 100%;
-  aspect-ratio: 5 / 4;
-  border-radius: 46% / 50%;
-  background:
-    radial-gradient(120% 100% at 50% 40%, #1f6b4a 0%, #15523a 45%, #0e3a29 100%);
+  max-width: 460px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  container-type: size;
+  border-radius: 50%;
+  background: radial-gradient(120% 100% at 50% 38%, #1f6b4a 0%, #15523a 45%, #0e3a29 100%);
   border: 6px solid var(--surface-3);
   box-shadow:
     inset 0 0 0 2px rgba(0, 0, 0, 0.35),
     inset 0 8px 40px rgba(0, 0, 0, 0.45),
     0 8px 24px rgba(0, 0, 0, 0.4);
+  touch-action: none; /* let pointer-drag of the You seat work without page scroll */
 }
 
-/* Centerpiece stat */
+/* Centerpiece stat — scales with the felt. */
 .pt-center {
   position: absolute;
   left: 50%;
@@ -28,41 +33,40 @@
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
-  color: var(--text);
+  width: 40cqmin;
 }
 .pt-center-num {
-  font-size: clamp(28px, 9vw, 46px);
+  font-size: 15cqmin;
   font-weight: 750;
   line-height: 1;
-  color: var(--text);
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 .pt-center-label {
-  font-size: 12px;
+  font-size: 3.4cqmin;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(231, 238, 245, 0.75);
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .pt-center-sub {
-  font-size: 12px;
+  font-size: 3.4cqmin;
   color: rgba(231, 238, 245, 0.6);
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-/* A seat is centered on its computed ellipse point. */
+/* A seat is centred on its computed ring point and sized via --sw (in cqmin). */
 .pt-seat {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: clamp(88px, 26%, 124px);
+  width: calc(var(--sw) * 1cqmin);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 6px;
+  gap: calc(var(--sw) * 0.04cqmin);
+  padding: calc(var(--sw) * 0.07cqmin) calc(var(--sw) * 0.05cqmin);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
@@ -72,43 +76,79 @@
     0 0 0 1px var(--accent),
     0 0 16px var(--accent-dim),
     0 4px 12px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.pt-seat--you.is-dragging {
+  cursor: grabbing;
+  z-index: 5;
+  filter: brightness(1.08);
+}
+
+/* Small grip affordance in the top-right of the You seat. */
+.pt-grip {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  font-size: calc(var(--sw) * 0.14cqmin);
+  color: var(--accent);
+  line-height: 1;
 }
 
 .pt-seat-name {
   max-width: 100%;
-  font-size: 13px;
+  font-size: calc(var(--sw) * 0.125cqmin);
   font-weight: 600;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: text;
+}
+
+/* Inline rename editor — sized to the seat. */
+.pt-name-input {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  font-size: calc(var(--sw) * 0.125cqmin);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 1px 3px;
+}
+.pt-name-input:focus {
+  outline: none;
 }
 
 .pt-seat-dice {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 3px;
 }
 .pt-seat-dice-num {
-  font-size: 22px;
+  font-size: calc(var(--sw) * 0.26cqmin);
   font-weight: 700;
   line-height: 1;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 .pt-seat-dice-label {
-  font-size: 11px;
+  font-size: calc(var(--sw) * 0.1cqmin);
   color: var(--text-dim);
 }
 
 .pt-seat-ctrls {
   display: flex;
-  gap: 6px;
+  gap: calc(var(--sw) * 0.05cqmin);
 }
-
 .pt-btn {
-  min-width: 30px;
-  padding: 4px 8px;
-  font-size: 16px;
+  min-width: calc(var(--sw) * 0.36cqmin);
+  padding: calc(var(--sw) * 0.04cqmin) calc(var(--sw) * 0.08cqmin);
+  font-size: calc(var(--sw) * 0.18cqmin);
   line-height: 1;
   font-weight: 700;
 }
@@ -116,6 +156,12 @@
   min-width: 24px;
   padding: 2px 6px;
   font-size: 14px;
+}
+
+.pt-hint {
+  font-size: 12px;
+  text-align: center;
+  margin: 0;
 }
 
 /* Eliminated players: de-emphasized chip row beneath the table. */

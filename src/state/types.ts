@@ -1,4 +1,4 @@
-import type { Bid, Face } from '../lib/types'
+import type { Bid, Face, Variant } from '../lib/types'
 
 export interface Player {
   id: string
@@ -13,6 +13,8 @@ export interface GameState {
   players: Player[]
   /** Dice each player starts a new game with (configurable, default 5). */
   startingDice: number
+  /** Game variant (no-wilds or ones-wild). */
+  variant: Variant
   /** The user's own dice, counted per face. Sum is the dice they've told the app. */
   heldByFace: Record<Face, number>
   /** The bid currently on the table the user is weighing, or null. */

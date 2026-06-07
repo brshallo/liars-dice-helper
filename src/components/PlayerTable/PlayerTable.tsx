@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import { useEffect, useRef, useState, type JSX, type PointerEvent as RPointerEvent } from 'react'
 import type { Player } from '../../state/types'
 import './PlayerTable.css'
 
@@ -9,43 +9,93 @@ interface PlayerTableProps {
   totalDice: number
   /** Adjust a player's dice by +1 / -1. */
   onAdjustDice: (id: string, delta: number) => void
+  /** Rename a player (double-click their name). */
+  onRename: (id: string, name: string) => void
 }
 
-/**
- * Seat geometry: active players sit on an ellipse. "You" is pinned to the bottom-center
- * (angle = 90deg, measuring clockwise from the top). The other seats are spread evenly
- * around the remaining arc so they fan out symmetrically left/right of "You".
- */
-function seatPosition(index: number, count: number, isYou: boolean): { left: string; top: string } {
-  // Angle in degrees, 0 = top, increasing clockwise. 90 = bottom-center (the "You" anchor).
-  let angleDeg: number
-  if (isYou || count === 1) {
-    angleDeg = 90
-  } else {
-    // Distribute the non-you seats over the full circle, skipping the bottom slot.
-    // Seats step by 360/count starting just past "You" so the ring stays even.
-    const step = 360 / count
-    angleDeg = 90 + step * index
-  }
+/** Seat-ring radius as a fraction of the felt (matched in PlayerTable.css geometry). */
+const RADIUS = 0.35
+
+/** Place a seat on the circular felt at `angleDeg` (0 = top, clockwise). */
+function seatStyle(angleDeg: number): { left: string; top: string } {
   const rad = (angleDeg * Math.PI) / 180
-  // Radii < 50% keep seats inside the felt; x is wider than y for the oval.
-  const x = 50 + 44 * Math.sin(rad)
-  const y = 50 - 38 * Math.cos(rad)
-  return { left: `${x}%`, top: `${y}%` }
+  return {
+    left: `${50 + RADIUS * 100 * Math.sin(rad)}%`,
+    top: `${50 - RADIUS * 100 * Math.cos(rad)}%`,
+  }
 }
 
-export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTableProps): JSX.Element {
+export function PlayerTable({
+  players,
+  totalDice,
+  onAdjustDice,
+  onRename,
+}: PlayerTableProps): JSX.Element {
   const active = players.filter((p) => p.dice > 0)
   const eliminated = players.filter((p) => p.dice === 0)
 
-  // Order active seats so "You" comes first (index 0 -> bottom-center anchor).
   const you = active.find((p) => p.isYou)
   const others = active.filter((p) => !p.isYou)
-  const ringPlayers = you ? [you, ...others] : others
+  const ring = you ? [you, ...others] : others
+  const count = ring.length
+
+  // "You" can be dragged around the ring; everyone else redistributes evenly from there.
+  // Angle: 0 = top, clockwise — so 180 = bottom-centre, where you'd naturally sit.
+  const [youAngle, setYouAngle] = useState(180)
+  const [dragging, setDragging] = useState(false)
+  const feltRef = useRef<HTMLDivElement>(null)
+
+  // Inline rename: double-click a name to edit it.
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+  const startRename = (p: Player) => {
+    setEditingId(p.id)
+    setDraft(p.name)
+  }
+  const commitRename = (id: string) => {
+    const name = draft.trim()
+    if (name) onRename(id, name)
+    setEditingId(null)
+  }
+
+  // Seat size scales with the felt (container-query units) AND with how many seats
+  // must fit, so 2 players read large and 8 stay clear of each other. Unit = cqmin.
+  const seatScale = count >= 7 ? 21 : count >= 5 ? 24 : 28
+
+  const angleFor = (index: number, isYou: boolean): number => {
+    if (isYou || count <= 1) return youAngle
+    return youAngle + (360 / count) * index
+  }
+
+  // Convert a pointer position to an angle around the felt centre (0 = top, clockwise).
+  const pointerAngle = (clientX: number, clientY: number): number => {
+    const r = feltRef.current!.getBoundingClientRect()
+    const dx = clientX - (r.left + r.width / 2)
+    const dy = clientY - (r.top + r.height / 2)
+    return (Math.atan2(dx, -dy) * 180) / Math.PI
+  }
+
+  useEffect(() => {
+    if (!dragging) return
+    const move = (e: PointerEvent) => setYouAngle(pointerAngle(e.clientX, e.clientY))
+    const stop = () => setDragging(false)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('pointercancel', stop)
+    return () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('pointercancel', stop)
+    }
+  }, [dragging])
 
   return (
     <div className="pt">
-      <div className="pt-felt">
+      <div
+        className="pt-felt"
+        ref={feltRef}
+        style={{ ['--sw' as string]: seatScale } as React.CSSProperties}
+      >
         <div className="pt-center">
           <div className="pt-center-num">{totalDice}</div>
           <div className="pt-center-label">dice in play</div>
@@ -54,15 +104,49 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
           </div>
         </div>
 
-        {ringPlayers.map((p, i) => {
-          const pos = seatPosition(i, ringPlayers.length, p.isYou)
+        {ring.map((p, i) => {
+          const isYou = p.isYou
+          // Stop a tap on the +/- buttons from starting a drag of the seat.
+          const stop = (e: RPointerEvent) => e.stopPropagation()
           return (
             <div
               key={p.id}
-              className={`pt-seat${p.isYou ? ' pt-seat--you' : ''}`}
-              style={{ left: pos.left, top: pos.top }}
+              className={`pt-seat${isYou ? ' pt-seat--you' : ''}${
+                isYou && dragging ? ' is-dragging' : ''
+              }`}
+              style={seatStyle(angleFor(i, isYou))}
+              onPointerDown={isYou ? () => setDragging(true) : undefined}
+              title={isYou ? 'Drag to move your seat around the table' : undefined}
             >
-              <div className="pt-seat-name">{p.name}</div>
+              {isYou && (
+                <span className="pt-grip" aria-hidden="true">
+                  ⠿
+                </span>
+              )}
+              {editingId === p.id ? (
+                <input
+                  className="pt-name-input"
+                  value={draft}
+                  autoFocus
+                  aria-label={`Rename ${p.name}`}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onPointerDown={stop}
+                  onBlur={() => commitRename(p.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename(p.id)
+                    else if (e.key === 'Escape') setEditingId(null)
+                  }}
+                />
+              ) : (
+                <div
+                  className="pt-seat-name"
+                  title="Double-click to rename"
+                  onPointerDown={stop}
+                  onDoubleClick={() => startRename(p)}
+                >
+                  {p.name}
+                </div>
+              )}
               <div className="pt-seat-dice">
                 <span className="pt-seat-dice-num">{p.dice}</span>
                 <span className="pt-seat-dice-label">dice</span>
@@ -72,6 +156,7 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
                   type="button"
                   className="pt-btn"
                   aria-label={`Remove a die from ${p.name}`}
+                  onPointerDown={stop}
                   onClick={() => onAdjustDice(p.id, -1)}
                 >
                   −
@@ -80,6 +165,7 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
                   type="button"
                   className="pt-btn"
                   aria-label={`Add a die to ${p.name}`}
+                  onPointerDown={stop}
                   onClick={() => onAdjustDice(p.id, +1)}
                 >
                   +

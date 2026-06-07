@@ -1,5 +1,5 @@
-import { unknownDice } from './probability'
-import { FACE_PROB, FACES, type TableContext } from './types'
+import { effectiveFloor, matchProb, unknownDice } from './probability'
+import { FACES, type TableContext } from './types'
 
 export interface QuantityWindow {
   min: number
@@ -9,10 +9,12 @@ export interface QuantityWindow {
 }
 
 export interface WindowOptions {
-  /** How many standard deviations of the unknown pool to span. Default 2 (~95%). */
+  /** How many standard deviations of the unknown pool to span. Default 1.6 (~89%). */
   sigma?: number
   /** Minimum number of columns, so small tables still give something to scan. */
   minWidth?: number
+  /** Hard cap on columns so the heatmap stays legible on a phone (no number-bleed). */
+  maxWidth?: number
 }
 
 /**
@@ -28,21 +30,31 @@ export interface WindowOptions {
  * least-held group and the high end from the most-held group, covering every row.
  */
 export function quantityWindow(ctx: TableContext, opts: WindowOptions = {}): QuantityWindow {
-  const sigma = opts.sigma ?? 2
+  const sigma = opts.sigma ?? 1.6
   const minWidth = opts.minWidth ?? 5
+  const maxWidth = opts.maxWidth ?? 10
 
   const U = unknownDice(ctx)
-  const sd = Math.sqrt(U * FACE_PROB * (1 - FACE_PROB)) // spread of the unknown pool
-  const held = FACES.map((f) => ctx.heldByFace[f] ?? 0)
-  const minHeld = Math.min(...held)
-  const maxHeld = Math.max(...held)
+  const variant = ctx.variant ?? 'no-wilds'
 
-  // Mean count of a face = its guaranteed floor + 1/6 of the unknown dice.
-  const lowMean = minHeld + U * FACE_PROB
-  const highMean = maxHeld + U * FACE_PROB
+  // Per face, the count is floor + Binomial(U, matchProb). Span the band from the
+  // lowest face's lower tail to the highest face's upper tail — this covers every row
+  // and is correct for both variants (under ones-wild the non-1 faces sit higher).
+  let lo = Infinity
+  let hi = -Infinity
+  let meanSum = 0
+  for (const f of FACES) {
+    const p = matchProb(f, variant)
+    const mean = effectiveFloor(ctx, f) + U * p
+    const sd = Math.sqrt(U * p * (1 - p))
+    lo = Math.min(lo, mean - sigma * sd)
+    hi = Math.max(hi, mean + sigma * sd)
+    meanSum += mean
+  }
+  const centreMean = meanSum / FACES.length
 
-  let min = Math.max(1, Math.floor(lowMean - sigma * sd))
-  let max = Math.min(ctx.totalDice, Math.ceil(highMean + sigma * sd))
+  let min = Math.max(1, Math.floor(lo))
+  let max = Math.min(ctx.totalDice, Math.ceil(hi))
   if (max < min) max = min
 
   // Guarantee a minimum width: grow upward toward N first, then downward toward 1.
@@ -50,6 +62,15 @@ export function quantityWindow(ctx: TableContext, opts: WindowOptions = {}): Qua
     if (max < ctx.totalDice) max++
     else if (min > 1) min--
     else break
+  }
+
+  // Cap width so the matrix never bleeds on a phone — keep the band centred on the
+  // mean (where the probability actually transitions) and drop the trivial tails.
+  if (max - min + 1 > maxWidth) {
+    const centre = Math.round(centreMean)
+    min = Math.max(min, centre - Math.floor(maxWidth / 2))
+    max = Math.min(max, min + maxWidth - 1)
+    min = Math.max(1, max - maxWidth + 1) // re-seat if we hit the top
   }
 
   const quantities: number[] = []

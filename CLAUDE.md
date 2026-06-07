@@ -5,10 +5,12 @@ the verbatim original request, and the architecture. This file is the quick-refe
 working in this folder.
 
 ## Project facts
-- **Variant: no wilds** — each face counts only as itself; each unknown die has a 1/6 chance
-  of a given face. Do NOT implement "ones are wild" unless explicitly asked.
-- **Photo capture of your dice = stretch goal.** MVP uses manual entry; keep CV code isolated
-  in `src/capture/`.
+- **Variants: no-wilds (default) and 1s-wild**, chosen in New game. No-wilds: each face is
+  itself, each unknown die 1/6. 1s-wild: 1s count as any face — a non-1 face is matched at 2/6
+  (it OR a 1) and your held 1s float every non-1 face; a bid ON 1s stays 1/6. The engine is
+  variant-aware via `TableContext.variant` (`src/lib/`); the active variant shows as a header badge.
+- **Photo capture of your dice = stretch goal.** Prototyped on the `dice-capture` branch (engine
+  bake-off in `src/capture/`, not wired into the app); manual entry is the shipped path.
 - **Repo is private.**
 - Core probability math is pure and lives in `src/lib/` — **build and unit-test it first**,
   before any UI.

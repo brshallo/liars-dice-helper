@@ -25,10 +25,16 @@ export function faceLabel(face: Face): string {
 }
 
 /**
- * Label for a face group. All six faces (pre-capture) read "any face"; otherwise
- * the pips of the faces it covers, e.g. "⚀ ⚁ ⚂".
+ * Label for a face group. All six faces read "any face"; a contiguous run of 3+
+ * collapses to a "first–last" range (keeps the 2–6 group under ones-wild compact);
+ * otherwise the individual pips, e.g. "⚀ ⚁ ⚂".
  */
 export function groupLabel(group: FaceGroup): string {
-  if (group.faces.length === 6) return 'any face'
-  return group.faces.map((f) => FACE_PIPS[f]).join(' ')
+  const faces = group.faces
+  if (faces.length === 6) return 'any face'
+  const contiguous = faces.every((f, i) => i === 0 || f === faces[i - 1] + 1)
+  if (contiguous && faces.length >= 3) {
+    return `${FACE_PIPS[faces[0]]}–${FACE_PIPS[faces[faces.length - 1]]}`
+  }
+  return faces.map((f) => FACE_PIPS[f]).join(' ')
 }

@@ -1,32 +1,51 @@
 import { binomAtLeast } from './binomial'
-import { FACE_PROB, FACES, type Bid, type Face, type TableContext } from './types'
+import { FACE_PROB, FACES, type Bid, type Face, type TableContext, type Variant } from './types'
+
+const variantOf = (ctx: TableContext): Variant => ctx.variant ?? 'no-wilds'
+
+/**
+ * Probability one unknown die counts toward `face`. No-wilds: always 1/6. Ones-wild:
+ * a non-1 face is matched by showing that face OR a 1 → 2/6; a 1 is still just 1/6.
+ */
+export function matchProb(face: Face, variant: Variant): number {
+  return variant === 'ones-wild' && face !== 1 ? 2 * FACE_PROB : FACE_PROB
+}
+
+/**
+ * Guaranteed count toward `face` from the user's own dice. No-wilds: just held of
+ * that face. Ones-wild: a non-1 face also gets every held 1 (wild); a 1 only its 1s.
+ */
+export function effectiveFloor(ctx: TableContext, face: Face): number {
+  const base = ctx.heldByFace[face] ?? 0
+  if (variantOf(ctx) === 'ones-wild' && face !== 1) return base + (ctx.heldByFace[1] ?? 0)
+  return base
+}
 
 /** How many dice the user holds in total (the known dice). */
 export function heldTotal(ctx: TableContext): number {
   return FACES.reduce((sum, f) => sum + (ctx.heldByFace[f] ?? 0), 0)
 }
 
-/** Dice whose value the user does NOT know — each independently 1/6 to show a face. */
+/** Dice whose value the user does NOT know. */
 export function unknownDice(ctx: TableContext): number {
   return Math.max(0, ctx.totalDice - heldTotal(ctx))
 }
 
 /**
  * P(at least `quantity` of `face` exist across the whole table), given the user's
- * own dice. The held dice of that face are a guaranteed floor, so we only need the
- * remaining (quantity - held) to come from the unknown pool:
+ * own dice and the variant. The effective floor is guaranteed, so we only need the
+ * remaining (quantity - floor) to come from the unknown pool at the face's match rate:
  *
- *   P(>= q of f) = P(>= (q - c) among U unknown dice, each 1/6)
+ *   P(>= q of f) = P(>= (q - floor) among U unknown dice, each matchProb(f))
  */
 export function probabilityOfBid(ctx: TableContext, bid: Bid): number {
-  const held = ctx.heldByFace[bid.face] ?? 0
-  const needed = bid.quantity - held
-  return binomAtLeast(needed, unknownDice(ctx), FACE_PROB)
+  const needed = bid.quantity - effectiveFloor(ctx, bid.face)
+  return binomAtLeast(needed, unknownDice(ctx), matchProb(bid.face, variantOf(ctx)))
 }
 
-/** Expected total number of `face` on the table = guaranteed floor + 1/6 of unknowns. */
+/** Expected total number of `face` on the table = floor + matchProb x unknown dice. */
 export function expectedCount(ctx: TableContext, face: Face): number {
-  return (ctx.heldByFace[face] ?? 0) + unknownDice(ctx) * FACE_PROB
+  return effectiveFloor(ctx, face) + unknownDice(ctx) * matchProb(face, variantOf(ctx))
 }
 
 /**

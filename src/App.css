@@ -1,43 +1,70 @@
 .app {
-  max-width: 1180px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 18px clamp(12px, 3vw, 28px) 48px;
+  padding: 14px clamp(12px, 3vw, 20px) 40px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
 }
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  flex-wrap: wrap;
-  padding-bottom: 14px;
+  gap: 10px;
+  flex-wrap: nowrap;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
-.app-header h1 {
-  font-size: clamp(1.3rem, 1rem + 1.6vw, 1.9rem);
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* allow the title group to shrink so New game stays on this line */
+}
+.app-title h1 {
+  font-size: clamp(1.05rem, 0.9rem + 1.2vw, 1.7rem);
   letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+.app-header .primary {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Game-type badge — always visible so the variant is never ambiguous, and a tap
+   toggle so you can switch 1s-wild on/off mid-game. */
+.variant-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+/* Keep the badge's own colours on hover (override the global button:hover). */
+.variant-badge:hover {
+  background: var(--surface-2);
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+.variant-badge.is-wild {
+  color: #10161c;
+  background: var(--warn);
+  border-color: var(--warn);
+}
+.variant-badge.is-wild:hover {
+  background: var(--warn);
+  border-color: var(--warn);
+  filter: brightness(1.06);
 }
 
 .app-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
-}
-
-.col {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-
-/* Stack on narrow screens (phones) — the primary target. */
-@media (max-width: 860px) {
-  .app-main {
-    grid-template-columns: 1fr;
-  }
+  gap: 12px;
 }
