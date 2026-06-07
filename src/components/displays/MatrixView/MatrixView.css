@@ -11,6 +11,18 @@
   align-items: stretch;
   /* If the band is wide on a narrow phone, scroll rather than crush cells. */
   overflow-x: auto;
+  /* positioned so children offsetLeft is measured relative to the grid (for centring) */
+  position: relative;
+}
+
+/* Freeze the face/exp label column: only the probability cells scroll under it. */
+.matrix-corner,
+.matrix-rowhead {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  box-shadow: 3px 0 5px -2px rgba(0, 0, 0, 0.45);
 }
 
 /* display:contents lets each .matrix-row contribute its children directly to
