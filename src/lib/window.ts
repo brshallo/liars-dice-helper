@@ -9,10 +9,12 @@ export interface QuantityWindow {
 }
 
 export interface WindowOptions {
-  /** How many standard deviations of the unknown pool to span. Default 2 (~95%). */
+  /** How many standard deviations of the unknown pool to span. Default 1.6 (~89%). */
   sigma?: number
   /** Minimum number of columns, so small tables still give something to scan. */
   minWidth?: number
+  /** Hard cap on columns so the heatmap stays legible on a phone (no number-bleed). */
+  maxWidth?: number
 }
 
 /**
@@ -28,8 +30,9 @@ export interface WindowOptions {
  * least-held group and the high end from the most-held group, covering every row.
  */
 export function quantityWindow(ctx: TableContext, opts: WindowOptions = {}): QuantityWindow {
-  const sigma = opts.sigma ?? 2
+  const sigma = opts.sigma ?? 1.6
   const minWidth = opts.minWidth ?? 5
+  const maxWidth = opts.maxWidth ?? 10
 
   const U = unknownDice(ctx)
   const sd = Math.sqrt(U * FACE_PROB * (1 - FACE_PROB)) // spread of the unknown pool
@@ -50,6 +53,15 @@ export function quantityWindow(ctx: TableContext, opts: WindowOptions = {}): Qua
     if (max < ctx.totalDice) max++
     else if (min > 1) min--
     else break
+  }
+
+  // Cap width so the matrix never bleeds on a phone — keep the band centred on the
+  // mean (where the probability actually transitions) and drop the trivial tails.
+  if (max - min + 1 > maxWidth) {
+    const centre = Math.round((lowMean + highMean) / 2)
+    min = Math.max(min, centre - Math.floor(maxWidth / 2))
+    max = Math.min(max, min + maxWidth - 1)
+    min = Math.max(1, max - maxWidth + 1) // re-seat if we hit the top
   }
 
   const quantities: number[] = []

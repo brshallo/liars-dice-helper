@@ -87,6 +87,8 @@
   display: grid;
   gap: 3px;
   align-items: stretch;
+  /* Scroll a wide band on a narrow phone instead of crushing the cells. */
+  overflow-x: auto;
 }
 
 /* display:contents so each group's header + cells share one grid row. */

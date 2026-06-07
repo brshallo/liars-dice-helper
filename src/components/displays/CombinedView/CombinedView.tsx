@@ -75,8 +75,9 @@ export function CombinedView({ panel, onSelectBid }: DisplayProps): JSX.Element 
       {/* ---- MATRIX ---- */}
       <div
         className="combined-grid"
-        // One label column + one column per quantity, sized to fit the panel.
-        style={{ gridTemplateColumns: `auto repeat(${quantities.length}, 1fr)` }}
+        // Label column + one per quantity. minmax keeps cells legible; the grid
+        // scrolls horizontally if the band can't fit rather than crushing numbers.
+        style={{ gridTemplateColumns: `auto repeat(${quantities.length}, minmax(2.4rem, 1fr))` }}
         role="grid"
       >
         <div className="combined-corner" role="columnheader" aria-label="face group">

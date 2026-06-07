@@ -24,8 +24,9 @@ export function MatrixView({ panel, onSelectBid }: DisplayProps): JSX.Element {
     <div className="matrix">
       <div
         className="matrix-grid"
-        // One label column + one column per quantity, sized to fit the panel.
-        style={{ gridTemplateColumns: `auto repeat(${quantities.length}, 1fr)` }}
+        // Label column + one per quantity. minmax keeps cells >=2.5rem so percentages
+        // never crush together; if the band can't fit, the grid scrolls horizontally.
+        style={{ gridTemplateColumns: `auto repeat(${quantities.length}, minmax(2.5rem, 1fr))` }}
         role="grid"
       >
         {/* Header row: empty corner, then the quantity columns. */}
