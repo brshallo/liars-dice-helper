@@ -27,9 +27,15 @@ function App() {
       <header className="app-header">
         <div className="app-title">
           <h1>Liar&apos;s Dice Helper</h1>
-          <span className={`variant-badge${isWild ? ' is-wild' : ''}`}>
+          <button
+            type="button"
+            className={`variant-badge${isWild ? ' is-wild' : ''}`}
+            onClick={() => dispatch({ type: 'TOGGLE_VARIANT' })}
+            aria-pressed={isWild}
+            title="Tap to toggle 1s wild"
+          >
             {isWild ? '1s wild' : 'No wilds'}
-          </span>
+          </button>
         </div>
         <NewGameButton />
       </header>

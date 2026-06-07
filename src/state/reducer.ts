@@ -45,6 +45,7 @@ export type GameAction =
   | { type: 'SET_HELD'; face: Face; count: number }
   | { type: 'CLEAR_HELD' }
   | { type: 'SET_BID'; bid: Bid | null }
+  | { type: 'TOGGLE_VARIANT' }
 
 /** Total dice the user currently claims to hold (the known dice). */
 function heldSum(held: Record<Face, number>): number {
@@ -111,6 +112,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SET_BID':
       return { ...state, currentBid: action.bid }
+
+    case 'TOGGLE_VARIANT':
+      // Flip the variant mid-game; all probabilities recompute from state.variant.
+      return { ...state, variant: state.variant === 'ones-wild' ? 'no-wilds' : 'ones-wild' }
 
     default:
       return state

@@ -32,7 +32,8 @@
   white-space: nowrap;
 }
 
-/* Game-type badge — always visible so the variant is never ambiguous. */
+/* Game-type badge — always visible so the variant is never ambiguous, and a tap
+   toggle so you can switch 1s-wild on/off mid-game. */
 .variant-badge {
   font-size: 0.72rem;
   font-weight: 700;
@@ -43,11 +44,23 @@
   color: var(--text-dim);
   background: var(--surface-2);
   border: 1px solid var(--border);
+  cursor: pointer;
+}
+/* Keep the badge's own colours on hover (override the global button:hover). */
+.variant-badge:hover {
+  background: var(--surface-2);
+  border-color: var(--accent-dim);
+  color: var(--text);
 }
 .variant-badge.is-wild {
   color: #10161c;
   background: var(--warn);
   border-color: var(--warn);
+}
+.variant-badge.is-wild:hover {
+  background: var(--warn);
+  border-color: var(--warn);
+  filter: brightness(1.06);
 }
 
 .app-main {
