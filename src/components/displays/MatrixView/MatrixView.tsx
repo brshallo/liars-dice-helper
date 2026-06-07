@@ -87,13 +87,6 @@ export function MatrixView({ panel, onSelectBid }: DisplayProps): JSX.Element {
           )
         })}
       </div>
-
-      <p className="matrix-caption muted">
-        Each cell is the chance the bid “at least <em>q</em> of that face” is{' '}
-        <strong>true</strong>. Green = likely true, safe to bid; red = likely a
-        bluff, challenge it. Tap a cell to set it as the live bid. Columns
-        auto-shift to the live range as dice leave the table.
-      </p>
     </div>
   )
 }

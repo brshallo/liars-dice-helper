@@ -133,8 +133,6 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
         })}
       </div>
 
-      <p className="pt-hint muted">Drag your seat ⠿ to match where you sit at the table.</p>
-
       {eliminated.length > 0 && (
         <div className="pt-out-row" aria-label="Eliminated players">
           {eliminated.map((p) => (

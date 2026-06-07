@@ -1,2 +1,2 @@
-export { SetupBar } from './SetupBar'
+export { NewGameButton } from './NewGameButton'
 export { YourDice } from './YourDice'

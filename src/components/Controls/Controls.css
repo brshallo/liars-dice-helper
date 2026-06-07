@@ -48,6 +48,50 @@ button.primary:hover {
   background: var(--accent);
 }
 
+/* New game dialog form */
+.newgame {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.newgame .stepper {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.variant-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.seg {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: max-content;
+}
+.seg button {
+  background: var(--surface-2);
+  border: none;
+  border-radius: 0;
+  padding: 7px 16px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.seg button + button {
+  border-left: 1px solid var(--border);
+}
+.seg button.active {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+.variant-note {
+  font-size: 0.82rem;
+  margin: 0;
+}
+
 button.link {
   background: none;
   border: none;
