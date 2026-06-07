@@ -29,3 +29,6 @@ dist-ssr
 # Playwright MCP verification artifacts (screenshots, snapshots)
 .playwright-mcp/
 verify-*.png
+bench-*.png
+synth-*.png
+ocv-*.png
