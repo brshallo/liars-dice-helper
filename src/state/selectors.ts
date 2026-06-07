@@ -20,7 +20,7 @@ export function totalDice(state: GameState): number {
 
 /** The view of the table the pure probability engine needs. */
 export function toTableContext(state: GameState): TableContext {
-  return { totalDice: totalDice(state), heldByFace: state.heldByFace }
+  return { totalDice: totalDice(state), heldByFace: state.heldByFace, variant: state.variant }
 }
 
 /** One probability cell in the grouped matrix. */

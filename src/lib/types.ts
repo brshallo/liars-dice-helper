@@ -7,6 +7,15 @@ export const FACES: readonly Face[] = [1, 2, 3, 4, 5, 6]
 export const FACE_PROB = 1 / 6
 
 /**
+ * Game variant.
+ * - `no-wilds`: every face counts only as itself; each unknown die is 1/6 a face.
+ * - `ones-wild`: 1s ("aces") count as ANY face. So an unknown die matches a non-1
+ *   face with prob 2/6 (it shows the face OR a 1), and your held 1s are a floor for
+ *   every non-1 face. A bid ON 1s is unaffected (still just literal 1s, 1/6).
+ */
+export type Variant = 'no-wilds' | 'ones-wild'
+
+/**
  * Everything the probability engine needs about the table from the user's seat.
  *
  * `heldByFace` is the user's OWN dice, known with certainty (manual entry or the
@@ -18,6 +27,8 @@ export interface TableContext {
   totalDice: number
   /** The user's own dice, counted per face. Sum must be <= totalDice. */
   heldByFace: Record<Face, number>
+  /** Defaults to `no-wilds` when omitted. */
+  variant?: Variant
 }
 
 /** A bid in Liar's Dice: "at least `quantity` dice showing `face`" across the table. */

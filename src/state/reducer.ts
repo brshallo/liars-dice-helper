@@ -1,10 +1,11 @@
-import type { Bid, Face } from '../lib/types'
+import type { Bid, Face, Variant } from '../lib/types'
 import { FACES } from '../lib/types'
 import type { GameState, Player } from './types'
 
 export const MIN_PLAYERS = 2
-export const MAX_PLAYERS = 8
+export const MAX_PLAYERS = 10
 export const DEFAULT_STARTING_DICE = 5
+export const DEFAULT_VARIANT: Variant = 'no-wilds'
 
 const emptyHeld = (): Record<Face, number> => ({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 })
 
@@ -17,11 +18,16 @@ function makePlayers(count: number, startingDice: number): Player[] {
   }))
 }
 
-export function createGame(playerCount = 5, startingDice = DEFAULT_STARTING_DICE): GameState {
+export function createGame(
+  playerCount = 5,
+  startingDice = DEFAULT_STARTING_DICE,
+  variant: Variant = DEFAULT_VARIANT,
+): GameState {
   const count = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, playerCount))
   return {
     players: makePlayers(count, startingDice),
     startingDice,
+    variant,
     heldByFace: emptyHeld(),
     currentBid: null,
     nextId: count + 1,
@@ -31,7 +37,7 @@ export function createGame(playerCount = 5, startingDice = DEFAULT_STARTING_DICE
 export const initialState: GameState = createGame()
 
 export type GameAction =
-  | { type: 'NEW_GAME'; playerCount: number; startingDice: number }
+  | { type: 'NEW_GAME'; playerCount: number; startingDice: number; variant: Variant }
   | { type: 'ADD_PLAYER' }
   | { type: 'REMOVE_PLAYER'; id: string }
   | { type: 'RENAME_PLAYER'; id: string; name: string }
@@ -48,7 +54,7 @@ function heldSum(held: Record<Face, number>): number {
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'NEW_GAME':
-      return createGame(action.playerCount, action.startingDice)
+      return createGame(action.playerCount, action.startingDice, action.variant)
 
     case 'ADD_PLAYER': {
       if (state.players.length >= MAX_PLAYERS) return state
