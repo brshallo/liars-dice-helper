@@ -17,6 +17,7 @@ function App() {
 
   const onAdjustDice = (id: string, delta: number) =>
     dispatch({ type: 'ADJUST_DICE', id, delta })
+  const onRename = (id: string, name: string) => dispatch({ type: 'RENAME_PLAYER', id, name })
   const onSelectBid = (bid: Bid | null) => dispatch({ type: 'SET_BID', bid })
 
   const isWild = game.variant === 'ones-wild'
@@ -36,7 +37,12 @@ function App() {
       <main className="app-main">
         {/* Probabilities first — the thing you check most during play. */}
         <ProbabilityPanel panel={panel} onSelectBid={onSelectBid} />
-        <PlayerTable players={game.players} totalDice={total} onAdjustDice={onAdjustDice} />
+        <PlayerTable
+          players={game.players}
+          totalDice={total}
+          onAdjustDice={onAdjustDice}
+          onRename={onRename}
+        />
         <YourDice />
       </main>
     </div>

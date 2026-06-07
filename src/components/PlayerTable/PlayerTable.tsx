@@ -9,6 +9,8 @@ interface PlayerTableProps {
   totalDice: number
   /** Adjust a player's dice by +1 / -1. */
   onAdjustDice: (id: string, delta: number) => void
+  /** Rename a player (double-click their name). */
+  onRename: (id: string, name: string) => void
 }
 
 /** Seat-ring radius as a fraction of the felt (matched in PlayerTable.css geometry). */
@@ -23,7 +25,12 @@ function seatStyle(angleDeg: number): { left: string; top: string } {
   }
 }
 
-export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTableProps): JSX.Element {
+export function PlayerTable({
+  players,
+  totalDice,
+  onAdjustDice,
+  onRename,
+}: PlayerTableProps): JSX.Element {
   const active = players.filter((p) => p.dice > 0)
   const eliminated = players.filter((p) => p.dice === 0)
 
@@ -37,6 +44,19 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
   const [youAngle, setYouAngle] = useState(180)
   const [dragging, setDragging] = useState(false)
   const feltRef = useRef<HTMLDivElement>(null)
+
+  // Inline rename: double-click a name to edit it.
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+  const startRename = (p: Player) => {
+    setEditingId(p.id)
+    setDraft(p.name)
+  }
+  const commitRename = (id: string) => {
+    const name = draft.trim()
+    if (name) onRename(id, name)
+    setEditingId(null)
+  }
 
   // Seat size scales with the felt (container-query units) AND with how many seats
   // must fit, so 2 players read large and 8 stay clear of each other. Unit = cqmin.
@@ -103,7 +123,30 @@ export function PlayerTable({ players, totalDice, onAdjustDice }: PlayerTablePro
                   ⠿
                 </span>
               )}
-              <div className="pt-seat-name">{p.name}</div>
+              {editingId === p.id ? (
+                <input
+                  className="pt-name-input"
+                  value={draft}
+                  autoFocus
+                  aria-label={`Rename ${p.name}`}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onPointerDown={stop}
+                  onBlur={() => commitRename(p.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename(p.id)
+                    else if (e.key === 'Escape') setEditingId(null)
+                  }}
+                />
+              ) : (
+                <div
+                  className="pt-seat-name"
+                  title="Double-click to rename"
+                  onPointerDown={stop}
+                  onDoubleClick={() => startRename(p)}
+                >
+                  {p.name}
+                </div>
+              )}
               <div className="pt-seat-dice">
                 <span className="pt-seat-dice-num">{p.dice}</span>
                 <span className="pt-seat-dice-label">dice</span>

@@ -104,6 +104,24 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: text;
+}
+
+/* Inline rename editor — sized to the seat. */
+.pt-name-input {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  font-size: calc(var(--sw) * 0.125cqmin);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 1px 3px;
+}
+.pt-name-input:focus {
+  outline: none;
 }
 
 .pt-seat-dice {
