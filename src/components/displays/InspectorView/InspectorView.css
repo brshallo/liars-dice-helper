@@ -1,7 +1,8 @@
+/* Compact so the whole inspector fits a common phone modal without scrolling. */
 .inspector {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: 10px;
   width: 100%;
 }
 
@@ -15,22 +16,22 @@
 .inspector-dials {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
+  gap: 10px;
 }
 
 .inspector-dial {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px;
+  gap: 4px;
+  padding: 7px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
 .inspector-dial-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -39,14 +40,14 @@
 .inspector-stepper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* Big, easy-to-hit touch targets for thumb use during play. */
+/* Touch targets — still thumb-friendly, just trimmed. */
 .inspector-step {
-  width: 48px;
-  height: 48px;
-  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -55,14 +56,14 @@
 }
 
 .inspector-face {
-  font-size: 2.6rem;
+  font-size: 2rem;
   line-height: 1;
   min-width: 1.4em;
   text-align: center;
 }
 
 .inspector-qty {
-  font-size: 2.4rem;
+  font-size: 2rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   min-width: 1.4em;
@@ -74,27 +75,27 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 18px 16px;
+  gap: 1px;
+  padding: 10px 14px;
   border: 2px solid var(--border);
   border-radius: var(--radius);
   text-align: center;
 }
 
 .inspector-headline-label {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--text);
 }
 
 .inspector-pct {
-  font-size: 4.2rem;
+  font-size: 2.9rem;
   font-weight: 800;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 
 .inspector-verdict {
-  font-size: 1rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: lowercase;
   color: var(--text-dim);
@@ -103,7 +104,7 @@
 /* --- Expected count line --- */
 .inspector-expected {
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 .inspector-expected strong {
   color: var(--text);
@@ -114,11 +115,11 @@
 .inspector-suggestions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .inspector-suggestions-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -126,28 +127,28 @@
 .inspector-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .inspector-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 6px;
+  padding: 5px 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
 }
 
 .inspector-chip-bid {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
 }
 
 .inspector-chip-pct {
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
