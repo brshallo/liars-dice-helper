@@ -124,15 +124,21 @@ function InfoContent(): JSX.Element {
 
       <ul className="info-key">
         <li>
-          <span className="info-badge">+1</span> a die of this face you already hold (input{' '}
-          <em>your</em> dice at the bottom of the screen), increasing exp above baseline.
+          <span className="info-badge">+1</span>
+          <span className="info-key-text">
+            a die of this face you already hold (input <em>your</em> dice at the bottom of the
+            screen), increasing exp above baseline.
+          </span>
         </li>
         <li>
-          <span className="info-exp">exp 3.4</span> the expected number of this face on the table.
+          <span className="info-exp">exp 3.4</span>
+          <span className="info-key-text">the expected number of this face on the table.</span>
         </li>
         <li>
-          <span className="info-num">1 2 3…</span> the bid quantities. They auto-narrow to the range
-          where the decision actually flips.
+          <span className="info-num">1 2 3…</span>
+          <span className="info-key-text">
+            the bid quantities. They auto-narrow to the range where the decision actually flips.
+          </span>
         </li>
       </ul>
 

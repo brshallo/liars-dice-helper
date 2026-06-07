@@ -140,23 +140,28 @@
   font-weight: 600;
 }
 
+/* Two-column grid shared across all rows: tokens in a max-content column (so the
+   descriptions all start at the same x), descriptions wrapping in the rest. */
 .info-key {
   margin: 14px 0 0;
   padding: 0;
   list-style: none;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: max-content 1fr;
   gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 .info-key li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  line-height: 1.45;
-  font-size: 0.9rem;
+  display: contents;
 }
-.info-key li > span:first-child {
-  flex: none;
+.info-key li > :first-child {
+  justify-self: start; /* don't stretch the pill to the column width */
+  align-self: baseline;
+}
+.info-key-text {
+  align-self: baseline;
+  min-width: 0;
 }
 
 .info-tap {
