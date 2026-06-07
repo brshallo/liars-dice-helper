@@ -125,7 +125,9 @@ function InfoContent(): JSX.Element {
         </li>
       </ul>
 
-      <p className="info-tap">👆 Tap any cell to inspect that exact bid.</p>
+      <p className="info-tap">
+        👆 Tap any cell to inspect that exact bid and see safe alternative bids.
+      </p>
     </div>
   )
 }
