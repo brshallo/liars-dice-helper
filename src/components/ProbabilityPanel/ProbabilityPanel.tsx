@@ -67,6 +67,7 @@ export function ProbabilityPanel({ panel, onSelectBid }: Props): JSX.Element {
 
 /** Visual-first explanation: a colour scale + a worked example row, minimal prose. */
 function InfoContent(): JSX.Element {
+  const exampleQ = [2, 3, 4, 5, 6]
   const exampleCells = [0.96, 0.82, 0.55, 0.27, 0.08]
   return (
     <div className="info-body">
@@ -90,31 +91,41 @@ function InfoContent(): JSX.Element {
         </div>
       </div>
 
-      {/* A worked example row, annotated. */}
-      <p className="info-head">Example row</p>
-      <div className="info-example">
+      {/* A worked example: bid quantities across the top, like the real matrix. */}
+      <p className="info-head">Example</p>
+      <div
+        className="info-example"
+        style={{ gridTemplateColumns: `auto repeat(${exampleQ.length}, 1fr)` }}
+      >
+        <div className="info-ex-corner" aria-hidden="true">
+          ≥
+        </div>
+        {exampleQ.map((q) => (
+          <div className="info-ex-qhead" key={q}>
+            {q}
+          </div>
+        ))}
+
         <div className="info-ex-label">
           <span className="info-ex-pip">⚄</span>
           <span className="info-badge">+1</span>
           <span className="info-exp">exp 3.4</span>
         </div>
-        <div className="info-ex-cells">
-          {exampleCells.map((p, i) => (
-            <span
-              key={i}
-              className="info-ex-cell"
-              style={{ background: probColor(p), color: probTextColor(p) }}
-            >
-              {formatPct(p)}
-            </span>
-          ))}
-        </div>
+        {exampleCells.map((p, i) => (
+          <span
+            key={i}
+            className="info-ex-cell"
+            style={{ background: probColor(p), color: probTextColor(p) }}
+          >
+            {formatPct(p)}
+          </span>
+        ))}
       </div>
 
       <ul className="info-key">
         <li>
-          <span className="info-badge">+1</span> a die of this face you already hold (plus wild 1s
-          in the 1s-wild game) — a guaranteed head start.
+          <span className="info-badge">+1</span> a die of this face you already hold (input{' '}
+          <em>your</em> dice at the bottom of the screen), increasing exp above baseline.
         </li>
         <li>
           <span className="info-exp">exp 3.4</span> the expected number of this face on the table.

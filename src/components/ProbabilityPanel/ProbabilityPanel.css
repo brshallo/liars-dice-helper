@@ -77,33 +77,39 @@
   color: var(--text);
 }
 
-/* Worked example row */
+/* Worked example: a mini matrix (quantities header + one row), like the real thing. */
 .info-example {
-  display: flex;
+  display: grid;
+  gap: 3px;
   align-items: center;
-  gap: 10px;
   padding: 10px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
+.info-ex-corner,
+.info-ex-qhead {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.info-ex-corner {
+  text-align: right;
+  padding-right: 4px;
+}
 .info-ex-label {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex: none;
+  white-space: nowrap;
+  padding-right: 6px;
 }
 .info-ex-pip {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   line-height: 1;
 }
-.info-ex-cells {
-  display: flex;
-  gap: 3px;
-  flex: 1;
-}
 .info-ex-cell {
-  flex: 1;
   text-align: center;
   padding: 6px 2px;
   border-radius: 4px;
