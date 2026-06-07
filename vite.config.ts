@@ -15,6 +15,8 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         'capture-lab': resolve(__dirname, 'capture-lab.html'),
         bench: resolve(__dirname, 'bench.html'),
+        realbench: resolve(__dirname, 'realbench.html'),
+        kbench: resolve(__dirname, 'kbench.html'),
       },
     },
   },

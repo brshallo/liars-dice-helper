@@ -35,3 +35,10 @@ synth-*.png
 ocv-*.png
 lab-*.png
 tmp-*.png
+
+# Third-party test images (not redistributed)
+src/capture/bench/samples/*.jpg
+src/capture/bench/samples/*.png
+
+# Local datasets (third-party, not redistributed)
+data/

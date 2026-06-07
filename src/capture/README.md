@@ -45,33 +45,50 @@ perfect), **extra/img** (false dice), and **speed** (mean / p95 inference ms). D
 Per-die accuracy by condition (hand-rolled): clean / colours / rotation / lighting / glare / messy
 all **100%**, blur 97%, **noise 69%** (its one weak spot — dense sensor speckle).
 
-## Verdict: ship the hand-rolled engine
-- **It wins on every axis that matters** — highest accuracy, near-zero false dice (0.14/img vs
-  OpenCV's 14), fastest, and **zero added download** (vs OpenCV's ~8 MB, which is a lot for a PWA).
-- **OpenCV works but isn't worth it.** It's the *same* classic-CV pip-clustering approach; it
-  over-detects because die-edge fragments survive as false pips, and it costs 8 MB. (Note: a one-line
-  bug — `RETR_EXTERNAL` masking pips behind the die-edge ring — was the difference between 15% and
-  76%; see `opencv/opencvEngine.ts`. Not pursued further since hand-rolled already wins.)
-- **ML is not viable this session.** No validated, hostable, offline dice-face model exists, and
-  there's no dataset on hand to train/tune one. The closest (skovy/tensorflow-dice-model, MIT) is
-  self-described as unreliable; Roboflow models need an API key + hosted runtime (breaks
-  client-side-only). The *runtime* (tfjs/onnxruntime-web) isn't the blocker — the model is. Full
-  detail and a "what it would take" plan in `engines/ml/FINDINGS.md`.
+### ⚠️ Reality check: real photos are much harder than the synthetic suite
+The synthetic numbers were **over-optimistic** — flat, perfectly-rendered dice. Tested on real
+photos (`realbench.html` = 8 hand-labelled phone shots; `kbench.html` = the 250-image Kaggle
+**d6-dice** set, YOLO labels, `data/d6-dice`, gitignored — see its `SOURCE.md`):
 
-## Important caveats
-- **Synthetic ≠ real.** These numbers are on generated images. Real glare, optics, odd dice, and
-  cluttered backgrounds are messier. Treat this as relative ranking, not an absolute accuracy promise.
-- **Make real dice the real benchmark:** drop real photos + a `labels.json` into `bench/samples/`
-  (loader hook is the place to wire `import.meta.glob`) and re-run `bench.html` to score on them.
-  The lab is also there to point a real camera at real dice and eyeball it.
-- Tunables (pip size floors, thresholds, cluster spacing) are named constants at the top of each
-  engine's files — sweep them if real images shift the regime (e.g. very high-res photos).
+| Test set | Scenario | Hand-rolled per-die | Exact-image | Notes |
+|---|---|---|---|---|
+| Synthetic | flat, clean | **97%** | 92% | best case, not representative |
+| Real, few dice | ~2–7 dice filling the frame, on felt | **~80%** | 50% | the actual use case; ~1 in 5 dice misread |
+| Real, dense | Kaggle trays of dozens of tiny dice | **37%** | 3% | under-detects — pips too small after downscale |
+
+So **classic CV does not generalise to arbitrary real photos.** It's *okay* (~80%) when you shoot a
+handful of well-lit dice that fill the frame, and poor when dice are small/dense/dim. OpenCV was no
+better (≈44% on the Kaggle subset, with many false dice).
+
+## Verdict (revised after real-photo testing)
+- **Of the classic-CV engines, hand-rolled is still the best** — zero dependency, fast, far fewer
+  false dice than OpenCV (0.14 vs 14 per image on synthetic; lower on real too), no 8 MB wasm.
+  OpenCV is the same pip-clustering idea but noisier and heavier; not worth it.
+- **But classic CV is not reliable enough to trust hands-off on real photos** (~80% per-die on
+  good shots, far worse on hard ones). It's an *assist*, not an oracle.
+- **The honest path forward depends on how good "good enough" is:**
+  1. **Ship hand-rolled as a confirm-first assist (cheapest).** Auto-detect → pre-fill the editable
+     grid → the user glances and fixes. At ~80% on a clean shot of your own ~5 dice that's a few
+     taps saved; the manual grid (already built) catches the rest. Near-zero cost.
+  2. **Constrain the capture to lift accuracy.** A guide box + "spread your dice, good light, shoot
+     top-down" keeps dice large in frame (the regime where it does well) and would push the good
+     case higher. Cheap, worth trying before anything heavier.
+  3. **Go ML for real robustness (bigger investment).** A small detector (YOLO/SSD) trained on a
+     set like Kaggle **d6-dice** — which we now have locally — is the real fix for unconstrained
+     real photos, at the cost of a ~5–20 MB model download + a training/conversion step. This is the
+     "other option" if confirm-first isn't good enough. See `engines/ml/FINDINGS.md`.
+
+## How real photos were tested
+- `realbench.html` — 8 hand-labelled phone photos (a few dice on felt) with overlays.
+- `kbench.html` — the 250-image Kaggle **d6-dice** set; parses the YOLO `.txt` labels (class 0–5 =
+  face 1–6) for exact ground truth and scores every engine. Data lives in `data/d6-dice/`
+  (gitignored, third-party; see `data/d6-dice/SOURCE.md`). Both run in-browser, driven via Playwright.
 
 ## If/when integrating into the app
 Capture → `faceCounts(dice)` → dispatch the existing `SET_HELD` actions (`src/state/reducer.ts`).
-Recommended flow (already prototyped in the lab): auto-detect, show the read in the editable grid,
-let the user confirm/correct before it becomes their held dice. Keep the engine lazy-loaded so the
-main bundle is unaffected.
+Use the **confirm-first** flow (already prototyped in the lab): auto-detect, show the read in the
+editable grid, let the user fix it before it becomes their held dice. Keep the engine lazy-loaded so
+the main bundle is unaffected.
 
 ## Files
 - `engines/types.ts` · `util.ts` · `index.ts` — interface, helpers, roster
