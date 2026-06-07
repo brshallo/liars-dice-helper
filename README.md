@@ -4,8 +4,9 @@ A browser app to assist while playing Liar's Dice: track each player's dice coun
 the live probability that a called quantity of a given face exists across all dice — with
 conditional probabilities once you tell it what's in your own hand.
 
-> **Status:** planning / not yet built. This README is the record a future build session
-> works from. See [Setup before building](#setup-before-building) for what to install first.
+> **Status:** MVP built. Manual dice entry, the no-wilds probability engine, the 2–8 player
+> table with elimination, and three switchable probability displays are all working, installable
+> as a PWA. Photo capture is still a stretch goal. See [How to run](#how-to-run--rebuild).
 
 ### Decisions made during planning
 - **Variant: no wilds.** Every face counts only as itself; each unknown die has a 1/6 chance
@@ -83,10 +84,26 @@ covers) instead of six redundant rows.
 
 ## How to run / rebuild
 
-> Not scaffolded yet. Once built, expect:
-> ```
-> npm install
-> npm run dev      # start the Vite dev server, open the printed localhost URL
-> npm test         # run the probability-engine unit tests (vitest)
-> npm run build    # production build (static files)
-> ```
+```
+npm install
+npm run dev      # start the Vite dev server, open the printed localhost URL
+npm test         # run the engine + state unit tests (vitest)
+npm run build    # production build (static PWA files in dist/)
+npm run preview  # serve the production build locally
+```
+
+### Codebase map
+- `src/lib/` — pure no-wilds probability engine (binomial, `probabilityOfBid`, expected count,
+  face grouping, the auto-window range). Unit-tested first, no React.
+- `src/state/` — game reducer + `derivePanel()`, the single selector all displays share.
+- `src/ui/` — shared probability-colour scale and formatting helpers + the dark theme tokens.
+- `src/components/PlayerTable/` — responsive oval table (2–8 players, elimination → OUT chips).
+- `src/components/displays/` — the three displays (`CombinedView`, `MatrixView`, `InspectorView`).
+- `src/components/ProbabilityPanel/` — tabbed switcher across the three displays.
+- `src/components/Controls/` — new-game setup and optional "your dice" entry.
+
+### Three displays (pick by playing with them)
+Rather than commit to one layout, the panel ships all three behind a tab switcher so they can be
+judged on real games. The key shared trick is **auto-windowing**: the matrix/inspector only show
+the band of bid quantities that actually matters for the current dice count, sliding from "one or
+two" late in a 2-player game up to "six or seven" with 8 players at the table.
