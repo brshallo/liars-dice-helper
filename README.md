@@ -1,109 +1,77 @@
 # Liar's Dice Helper
 
-A browser app to assist while playing Liar's Dice: track each player's dice count and see
-the live probability that a called quantity of a given face exists across all dice — with
-conditional probabilities once you tell it what's in your own hand.
+A browser app (installable PWA) to assist while playing Liar's Dice: track every player's dice
+count around a table and see the live probability that a bid ("at least *q* of a face") is true —
+sharpened once you enter the dice in your own hand.
 
-> **Status:** MVP built. Manual dice entry, the no-wilds probability engine, the 2–8 player
-> table with elimination, and three switchable probability displays are all working, installable
-> as a PWA. Photo capture is still a stretch goal. See [How to run](#how-to-run--rebuild).
+> **Status:** Built and working. Manual dice entry, the probability engine (no-wilds **and**
+> 1s-wild), the 2–10 player table, and the probability panel are all live, installable as a PWA.
+> Camera capture of your dice was prototyped separately — see [Photo capture](#photo-capture-experiment).
 
-### Decisions made during planning
-- **Variant: no wilds.** Every face counts only as itself; each unknown die has a 1/6 chance
-  of showing a given face. (Not the "ones are wild" variant.)
-- **Photo capture is a stretch goal.** The MVP uses fast manual entry of your own dice;
-  camera-based dice recognition comes later (it's feasible in-browser but fragile to
-  lighting/angle).
-- **Repo is private** for now.
+## Features
+- **2–10 players, 1–10 dice each.** New game opens a dialog (players / dice / variant).
+- **Two variants, toggleable mid-game.** Tap the header badge to flip **No wilds ⇄ 1s wild**; all
+  probabilities recompute. (1s-wild: 1s count as any face.)
+- **Poker-style table.** Players sit around an oval felt that scales from 2 to 10 without clipping.
+  Drag your own seat to match where you sit; double-click a name to rename; +/- adjusts each
+  player's dice; a player at 0 dice drops to a faded "OUT" chip.
+- **Your dice (optional).** Enter what you're holding to turn your dice into a guaranteed floor and
+  sharpen every probability.
+- **Probability matrix.** Faces (grouped when they share odds) × bid quantities, coloured red→green.
+  The quantity columns **auto-window** to the decision zone and start centred on the expected count;
+  the face/exp column stays frozen while the numbers scroll.
+- **Tap a cell → inspector.** Opens a focused readout for that exact bid plus the safest alternative
+  bids. An **(i)** button explains how to read it all.
+- Installable PWA (offline, add-to-home-screen).
 
----
-
-## Setup before building
-
-A future Claude Code build session needs two things in place first:
-
-1. **Git identity** (one-time, machine-wide):
-   ```
-   git config --global user.name "Bryan Shalloway"
-   git config --global user.email "brshallo@gmail.com"
-   ```
-2. **Playwright MCP** so Claude can open the running app in a real browser, click the +/−
-   buttons, and screenshot the layout to verify it:
-   ```
-   claude mcp add playwright npx @playwright/mcp@latest
-   ```
-   (Restart Claude Code after; browser binaries auto-download on first use.)
-
-Already in place: Node 26, npm 11, git, and an authenticated `gh` CLI. Optional extra:
-`context7` MCP for up-to-date library docs.
-
----
-
-## Planned architecture
-
-**Stack:** Vite + React + TypeScript, built as a **PWA** (installable on a phone home
-screen). Everything runs client-side — the probability math is pure functions, so the app
-is just static files (free to host on GitHub Pages or Vercel). A native wrap (Capacitor for
-Android, Tauri for Mac) stays a clean future option because all logic lives in portable TS.
-
-```
-liars-dice-helper/
-  README.md            # this file
-  CLAUDE.md            # project conventions
-  src/
-    lib/               # pure probability engine (no React) — unit-tested
-      probability.ts   # P(>= k of face f among N unknown dice), no wilds
-    state/             # game state: players, dice counts, your captured dice
-    components/
-      PlayerTable/      # poker-table clock layout (responsive: few vs many players)
-      ProbabilityPanel/ # distribution display; groups faces with identical conditionals
-      Controls/         # +/- dice buttons, new-game setup
-    capture/           # STRETCH: camera + dice recognition (TF.js), isolated here
-  tests/               # vitest unit tests for the probability engine
-```
-
-### Core math (no-wilds)
-Let `N` = total number of *unknown* dice on the table (everyone's dice minus the dice you
-can see, including your own captured dice). For a call of `k` dice showing face `f`:
-
-```
-P(at least k showing f) = 1 - BinomialCDF(k - 1; N, 1/6)
-```
-
-Knowing your own dice (a) removes them from `N` and (b) adds your matching count as a
-guaranteed floor. Build and unit-test this engine first.
-
-### "Smart real-estate" for probabilities
-With no wilds, all six faces are symmetric **until** you capture your own dice. After
-capture, faces group by how many of that face you already hold — e.g. holding one 2 and one
-3 means faces 2 and 3 share an identical conditional distribution, and 1/4/5/6 share another.
-The probability panel should render **one row per distinct group** (labeled with the faces it
-covers) instead of six redundant rows.
-
----
-
-## How to run / rebuild
-
+## How to run
 ```
 npm install
-npm run dev      # start the Vite dev server, open the printed localhost URL
-npm test         # run the engine + state unit tests (vitest)
+npm run dev      # dev server (prints a localhost URL)
+npm test         # engine + state unit tests (vitest)
 npm run build    # production build (static PWA files in dist/)
 npm run preview  # serve the production build locally
 ```
+Open `/phone.html` in the dev server to preview the app inside a phone frame at common device sizes.
 
-### Codebase map
-- `src/lib/` — pure no-wilds probability engine (binomial, `probabilityOfBid`, expected count,
-  face grouping, the auto-window range). Unit-tested first, no React.
-- `src/state/` — game reducer + `derivePanel()`, the single selector all displays share.
-- `src/ui/` — shared probability-colour scale and formatting helpers + the dark theme tokens.
-- `src/components/PlayerTable/` — responsive oval table (2–8 players, elimination → OUT chips).
-- `src/components/displays/` — the three displays (`CombinedView`, `MatrixView`, `InspectorView`).
-- `src/components/ProbabilityPanel/` — tabbed switcher across the three displays.
-- `src/components/Controls/` — new-game setup and optional "your dice" entry.
+## Architecture
+Vite + React + TypeScript, **client-side only** — the probability math is pure functions, so the
+app is just static files. The engine is built and unit-tested before any UI.
 
-### Three displays (pick by playing with them)
-Rather than commit to one layout, the panel ships all three behind a tab switcher so they can be
-judged on real games. The key shared trick is **auto-windowing**: the matrix/inspector only show
-the band of bid quantities that actually matters for the current dice count, sliding from "one or
-two" late in a 2-player game up to "six or seven" with 8 players at the table.
+```
+src/
+  lib/                 # pure, variant-aware probability engine (no React) — unit-tested
+    binomial.ts        # exact binomial pmf/cdf/atLeast
+    probability.ts     # matchProb, effectiveFloor, probabilityOfBid, expectedCount, nextBids
+    grouping.ts        # collapse faces into groups that share a distribution
+    window.ts          # auto-window: the band of bid quantities worth showing
+  state/               # reducer (players, dice, held dice, bid, variant) + derivePanel() selector
+  ui/                  # probability colour scale, formatting helpers, dark theme tokens
+  components/
+    PlayerTable/       # oval table: drag-your-seat, rename, +/- dice, elimination
+    Controls/          # NewGameButton (dialog) + YourDice entry
+    ProbabilityPanel/  # the matrix + the (i) info and bid-inspector modals
+    displays/          # MatrixView (heatmap) + InspectorView (focused single bid)
+    Modal/             # reusable dialog
+public/phone.html      # device-frame preview for testing the mobile layout
+```
+
+### Core math
+`U` = unknown dice = total dice − the dice you hold. For a bid "at least *q* of face *f*":
+
+```
+P(≥ q of f) = 1 − BinomialCDF(q − floor − 1 ; U , matchProb)
+```
+- **No wilds:** `matchProb = 1/6`; `floor` = how many of *f* you hold.
+- **1s wild:** a non-1 face is matched by showing *f* OR a 1, so `matchProb = 2/6`, and your held 1s
+  add to the `floor` of every non-1 face. A bid *on* 1s stays `1/6`. (So even before you enter any
+  dice, 1s-wild shows two rows: the 1s, and everything else.)
+
+Faces that share the same `(floor, matchProb)` collapse into one matrix row.
+
+## Photo capture (experiment)
+The original stretch goal — read your dice from a photo — was prototyped on the **`dice-capture`
+branch** (not merged, not wired into the app). It's an isolated bake-off of three recognition
+engines against a synthetic labelled benchmark; the dependency-free hand-rolled detector won. See
+`src/capture/README.md` on that branch.
+
