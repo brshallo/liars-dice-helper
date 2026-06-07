@@ -126,8 +126,7 @@ function InfoContent(): JSX.Element {
         <li>
           <span className="info-badge">+1</span>
           <span className="info-key-text">
-            A die of this face you already hold (input <em>your</em> dice at the bottom of the
-            screen), increasing exp above baseline.
+            A die of this face you hold — raises exp above baseline (enter <em>your</em> dice below).
           </span>
         </li>
         <li>
