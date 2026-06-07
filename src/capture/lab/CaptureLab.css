@@ -1,0 +1,168 @@
+.lab {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lab-head h1 {
+  margin-bottom: 6px;
+}
+.lab-head p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.lab-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.lab-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Engine tabs */
+.engine-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.engine-tab.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* Input buttons */
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.primary {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.ghost {
+  background: transparent;
+}
+
+/* The file input is hidden; its <label> is the styled button. */
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.upload-btn:hover {
+  background: var(--surface-3);
+}
+
+.lab-error {
+  margin: 0;
+  color: var(--warn);
+  font-size: 0.9rem;
+}
+
+/* Media (video + display canvas) */
+.media {
+  width: 100%;
+  max-width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: block;
+}
+
+.canvas-wrap {
+  position: relative;
+  min-height: 80px;
+}
+.canvas-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 24px;
+}
+.canvas-spinner {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
+.lab-meta {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* Editable face-count grid */
+.dice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .dice-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+.die-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+}
+.die-face {
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--text);
+}
+.die-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.die-stepper button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.die-count {
+  min-width: 1.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.lab-total {
+  margin: 0;
+  font-size: 0.95rem;
+}

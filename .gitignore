@@ -32,3 +32,5 @@ verify-*.png
 bench-*.png
 synth-*.png
 ocv-*.png
+lab-*.png
+tmp-*.png
