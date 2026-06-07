@@ -164,8 +164,21 @@
   min-width: 0;
 }
 
+/* Icon hangs to the left; the italic text wraps as a block beside it. Its indent is
+   smaller than the key list above (it's a tip, not a key entry). */
 .info-tap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   margin: 16px 0 0;
   font-size: 0.92rem;
   color: var(--text);
+}
+.info-tap-icon {
+  flex: none;
+}
+.info-tap-text {
+  flex: 1;
+  min-width: 0;
+  font-style: italic;
 }

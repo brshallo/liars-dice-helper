@@ -81,12 +81,12 @@ function InfoContent(): JSX.Element {
         <div className="info-scale-bar" />
         <div className="info-scale-ends">
           <span>
-            <strong>Red</strong> · likely a bluff
-            <br />→ challenge it
+            <strong>Red</strong> · Likely a bluff
+            <br />→ Challenge it
           </span>
           <span className="right">
-            <strong>Green</strong> · likely true
-            <br />→ safe to bid
+            <strong>Green</strong> · Likely true
+            <br />→ Safe to bid
           </span>
         </div>
       </div>
@@ -126,24 +126,29 @@ function InfoContent(): JSX.Element {
         <li>
           <span className="info-badge">+1</span>
           <span className="info-key-text">
-            a die of this face you already hold (input <em>your</em> dice at the bottom of the
+            A die of this face you already hold (input <em>your</em> dice at the bottom of the
             screen), increasing exp above baseline.
           </span>
         </li>
         <li>
           <span className="info-exp">exp 3.4</span>
-          <span className="info-key-text">the expected number of this face on the table.</span>
+          <span className="info-key-text">The expected number of this face on the table.</span>
         </li>
         <li>
           <span className="info-num">1 2 3…</span>
           <span className="info-key-text">
-            the bid quantities. They auto-narrow to the range where the decision actually flips.
+            The bid quantities. They auto-narrow to the range where the decision actually flips.
           </span>
         </li>
       </ul>
 
       <p className="info-tap">
-        👆 Tap any cell to inspect that exact bid and see safe alternative bids.
+        <span className="info-tap-icon" aria-hidden="true">
+          👆
+        </span>
+        <span className="info-tap-text">
+          Tap any cell to inspect that exact bid and see safe alternative bids.
+        </span>
       </p>
     </div>
   )
