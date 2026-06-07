@@ -138,11 +138,14 @@ function InfoContent(): JSX.Element {
           <span className="info-key-text">The bid quantities — how many of the face are claimed.</span>
         </li>
         <li>
-          <span
-            className="info-pct-sample"
-            style={{ background: probColor(0.71), color: probTextColor(0.71) }}
-          >
-            71%
+          <span className="info-bidcell">
+            <span className="info-bidcell-q">3</span>
+            <span
+              className="info-bidcell-pct"
+              style={{ background: probColor(0.82), color: probTextColor(0.82) }}
+            >
+              82%
+            </span>
           </span>
           <span className="info-key-text">The chance that bid is true.</span>
         </li>
