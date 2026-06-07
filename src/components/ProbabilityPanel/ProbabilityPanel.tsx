@@ -126,7 +126,7 @@ function InfoContent(): JSX.Element {
         <li>
           <span className="info-badge">+1</span>
           <span className="info-key-text">
-            A die of this face you hold — raises exp above baseline (enter <em>your</em> dice below).
+            A die of this face you hold — raises exp above baseline (input <em>your</em> dice below).
           </span>
         </li>
         <li>
@@ -134,10 +134,17 @@ function InfoContent(): JSX.Element {
           <span className="info-key-text">The expected number of this face on the table.</span>
         </li>
         <li>
-          <span className="info-num">1 2 3…</span>
-          <span className="info-key-text">
-            The bid quantities. They auto-narrow to the range where the decision actually flips.
+          <span className="info-num">2 3 4</span>
+          <span className="info-key-text">The bid quantities — how many of the face are claimed.</span>
+        </li>
+        <li>
+          <span
+            className="info-pct-sample"
+            style={{ background: probColor(0.71), color: probTextColor(0.71) }}
+          >
+            71%
           </span>
+          <span className="info-key-text">The chance that bid is true.</span>
         </li>
       </ul>
 
@@ -146,7 +153,7 @@ function InfoContent(): JSX.Element {
           👆
         </span>
         <span className="info-tap-text">
-          Tap any cell to inspect that exact bid and see safe alternative bids.
+          Tap any cell to inspect that exact bid and see safest alternative bids.
         </span>
       </p>
     </div>

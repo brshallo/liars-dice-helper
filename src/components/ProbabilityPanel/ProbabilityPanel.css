@@ -139,6 +139,14 @@
   color: var(--text-dim);
   font-weight: 600;
 }
+/* A sample heat cell shown in the key, so "the percentage" is visible, not just named. */
+.info-pct-sample {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 
 /* Two-column grid shared across all rows: tokens in a max-content column (so the
    descriptions all start at the same x), descriptions wrapping in the rest. */
