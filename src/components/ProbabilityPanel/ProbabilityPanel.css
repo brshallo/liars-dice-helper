@@ -1,0 +1,36 @@
+.prob-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.view-switch {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.view-switch button {
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 8px 6px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.view-switch button.active {
+  background: var(--surface-3);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.view-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--gap);
+}

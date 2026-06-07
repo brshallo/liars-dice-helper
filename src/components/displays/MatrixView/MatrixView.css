@@ -1,0 +1,105 @@
+.matrix {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.matrix-grid {
+  display: grid;
+  /* columns set inline from the quantity count */
+  gap: 3px;
+  align-items: stretch;
+  /* If the band is wide on a narrow phone, scroll rather than crush cells. */
+  overflow-x: auto;
+}
+
+/* display:contents lets each .matrix-row contribute its children directly to
+   the grid tracks, so header + cells stay aligned on a single row. */
+.matrix-row {
+  display: contents;
+}
+
+.matrix-corner,
+.matrix-qhead {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix-corner {
+  text-align: right;
+  padding-right: 8px;
+}
+
+.matrix-rowhead {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 10px 0 2px;
+  white-space: nowrap;
+}
+
+.matrix-rowlabel {
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--text);
+}
+
+.matrix-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  line-height: 1.3;
+}
+
+.matrix-exp {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix-cell {
+  /* override the global button chrome — these are coloured heat cells */
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 6px 2px;
+  min-width: 2.4ch;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: pointer;
+  transition: filter 0.1s ease, outline-color 0.1s ease;
+}
+
+.matrix-cell:hover {
+  /* brighten on hover without changing the heat colour */
+  filter: brightness(1.12);
+  background: inherit; /* defeat global button:hover */
+}
+
+.matrix-cell:active {
+  transform: translateY(1px);
+}
+
+/* The cell matching the live bid gets a bright accent ring. */
+.matrix-cell.is-active {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 1px var(--bg), 0 0 8px var(--accent-dim);
+}
+
+.matrix-caption {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.matrix-caption strong {
+  color: var(--text);
+}

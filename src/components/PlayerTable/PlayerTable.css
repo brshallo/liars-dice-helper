@@ -1,0 +1,151 @@
+.pt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 100%;
+}
+
+/* The oval "felt". Square-ish aspect keeps the ellipse geometry stable as it scales. */
+.pt-felt {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  border-radius: 46% / 50%;
+  background:
+    radial-gradient(120% 100% at 50% 40%, #1f6b4a 0%, #15523a 45%, #0e3a29 100%);
+  border: 6px solid var(--surface-3);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+    inset 0 8px 40px rgba(0, 0, 0, 0.45),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Centerpiece stat */
+.pt-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  color: var(--text);
+}
+.pt-center-num {
+  font-size: clamp(28px, 9vw, 46px);
+  font-weight: 750;
+  line-height: 1;
+  color: var(--text);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.pt-center-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(231, 238, 245, 0.75);
+  margin-top: 4px;
+}
+.pt-center-sub {
+  font-size: 12px;
+  color: rgba(231, 238, 245, 0.6);
+  margin-top: 6px;
+}
+
+/* A seat is centered on its computed ellipse point. */
+.pt-seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(88px, 26%, 124px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.pt-seat--you {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 16px var(--accent-dim),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.pt-seat-name {
+  max-width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-seat-dice {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.pt-seat-dice-num {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.pt-seat-dice-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.pt-seat-ctrls {
+  display: flex;
+  gap: 6px;
+}
+
+.pt-btn {
+  min-width: 30px;
+  padding: 4px 8px;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 700;
+}
+.pt-btn--sm {
+  min-width: 24px;
+  padding: 2px 6px;
+  font-size: 14px;
+}
+
+/* Eliminated players: de-emphasized chip row beneath the table. */
+.pt-out-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.pt-out-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 10px;
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  opacity: 0.7;
+}
+.pt-out-name {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+.pt-out-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+}
