@@ -1,11 +1,23 @@
 /// <reference types="vitest/config" />
+import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 // Installable PWA (offline static app) + vitest config for the pure engine in src/lib.
+// `dice-capture` branch only: capture-lab.html and bench.html are separate build
+// entries for the isolated recognition experiment; the main app at / never imports them.
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        'capture-lab': resolve(__dirname, 'capture-lab.html'),
+        bench: resolve(__dirname, 'bench.html'),
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
