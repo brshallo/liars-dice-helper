@@ -106,7 +106,7 @@ button.link {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: var(--gap);
+  padding: 10px;
 }
 .your-dice-head {
   display: flex;
@@ -117,8 +117,8 @@ button.link {
   font-size: 1rem;
 }
 .hint {
-  font-size: 0.82rem;
-  margin: 4px 0 10px;
+  font-size: 0.8rem;
+  margin: 3px 0 8px;
 }
 .face-steppers {
   display: grid;

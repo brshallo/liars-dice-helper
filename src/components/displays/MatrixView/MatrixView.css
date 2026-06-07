@@ -1,6 +1,6 @@
 .matrix {
-  --head-h: 22px;
-  --row-h: 36px;
+  --head-h: 20px;
+  --row-h: 34px;
   display: flex;
   align-items: stretch;
 }
