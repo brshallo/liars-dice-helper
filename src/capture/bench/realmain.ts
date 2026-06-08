@@ -1,5 +1,5 @@
 import { handrolledEngine } from '../engines/handrolled'
-import { opencvEngine } from '../engines/opencv'
+import { twostageEngine } from '../engines/twostage'
 import type { DieDetection, DieValue } from '../engines/types'
 import { scoreDice } from './runner'
 
@@ -75,7 +75,7 @@ const sorted = (vs: number[]) => [...vs].sort((a, b) => a - b).join(', ')
 
 async function run() {
   root.innerHTML = '<h1>Real-photo recognition test</h1><p style="color:#666">Loading OpenCV…</p>'
-  await opencvEngine.load().catch(() => {})
+  await twostageEngine.load().catch(() => {})
   root.innerHTML = '<h1>Real-photo recognition test</h1>'
 
   const totals = { trueDice: 0, matched: 0, extra: 0, labelledImgs: 0, exactImgs: 0 }
@@ -84,23 +84,23 @@ async function run() {
     const name = path.split('/').pop()!
     const truth = LABELS[name] ?? null
     const canvas = await loadCanvas(url)
+    const ts = await twostageEngine.recognize(canvas)
     const hr = await handrolledEngine.recognize(canvas)
-    const ov = await opencvEngine.recognize(canvas)
 
     const card = document.createElement('figure')
     card.style.cssText =
       'margin:0 0 18px;border:1px solid #ddd;border-radius:8px;padding:10px;display:grid;grid-template-columns:1fr 280px;gap:14px;align-items:start;background:#fafafa'
 
-    const ovCanvas = overlay(canvas, hr.dice)
+    const ovCanvas = overlay(canvas, ts.dice)
     ovCanvas.style.cssText = 'width:100%;height:auto;border-radius:4px'
     card.appendChild(ovCanvas)
 
-    const hrVals = hr.dice.map((d) => d.value)
+    const tsVals = ts.dice.map((d) => d.value)
     const info = document.createElement('figcaption')
     info.style.cssText = 'font-size:13px;line-height:1.6'
     let scoreLine = ''
     if (truth) {
-      const s = scoreDice(hr.dice, truth)
+      const s = scoreDice(ts.dice, truth)
       totals.trueDice += s.trueTotal
       totals.matched += s.matched
       totals.extra += s.extra
@@ -110,11 +110,11 @@ async function run() {
     }
     info.innerHTML = `
       <b>${name}</b><br>
-      <span style="color:#b00">Hand-rolled overlay (boxes = detected dice)</span><br><br>
+      <span style="color:#b00">Two-stage overlay (boxes = detected dice)</span><br><br>
       truth (top faces): <code>${truth ? sorted(truth) : '—'}</code><br>
-      hand-rolled: <code>${sorted(hrVals)}</code> <span style="color:#888">(${hrVals.length} dice)</span><br>
+      two-stage: <code>${sorted(tsVals)}</code> <span style="color:#888">(${tsVals.length} dice)</span><br>
       ${scoreLine}<br><br>
-      <span style="color:#888">OpenCV: ${ov.dice.length} dice — <code>${sorted(ov.dice.map((d) => d.value))}</code></span>
+      <span style="color:#888">Hand-rolled: ${hr.dice.length} dice — <code>${sorted(hr.dice.map((d) => d.value))}</code></span>
     `
     card.appendChild(info)
     root.appendChild(card)
@@ -123,7 +123,7 @@ async function run() {
   const summary = document.createElement('div')
   summary.style.cssText = 'margin-top:10px;padding:12px;border:2px solid #333;border-radius:8px;font-size:15px'
   const perDie = totals.trueDice ? ((totals.matched / totals.trueDice) * 100).toFixed(0) : '—'
-  summary.innerHTML = `<b>Hand-rolled on labelled real photos:</b> per-die ${perDie}% (${totals.matched}/${totals.trueDice}),
+  summary.innerHTML = `<b>Two-stage on labelled real photos:</b> per-die ${perDie}% (${totals.matched}/${totals.trueDice}),
     exact images ${totals.exactImgs}/${totals.labelledImgs}, extra/false dice ${totals.extra} total.`
   root.insertBefore(summary, root.children[1])
   ;(window as unknown as { __REAL__: unknown }).__REAL__ = totals

@@ -52,7 +52,9 @@ function cropToTensor(img: HTMLImageElement, cx: number, cy: number, w: number, 
   const sy = Math.max(0, cy * H - sh / 2)
   cctx.clearRect(0, 0, CROP, CROP)
   cctx.drawImage(img, sx, sy, Math.min(sw, W - sx), Math.min(sh, H - sy), 0, 0, CROP, CROP)
-  return tf.tidy(() => tf.browser.fromPixels(cropCanvas).toFloat().div(255)) as tf.Tensor3D
+  // GRAYSCALE (mean of channels): pip COUNT is about shape, not the dice's colour, so
+  // training on luminance avoids overfitting to one dataset's specific dice colours.
+  return tf.tidy(() => tf.browser.fromPixels(cropCanvas).toFloat().mean(2, true).div(255)) as tf.Tensor3D
 }
 
 async function harvest(): Promise<{ xs: tf.Tensor4D; labels: number[] }> {
@@ -61,17 +63,41 @@ async function harvest(): Promise<{ xs: tf.Tensor4D; labels: number[] }> {
     .filter((it) => it.ann)
   const crops: tf.Tensor3D[] = []
   const labels: number[] = []
+  const median = (a: number[]) => (a.length ? [...a].sort((p, q) => p - q)[a.length >> 1] : 0.08)
+  let negCount = 0
   for (let i = 0; i < items.length; i++) {
     const it = items[i]
     const img = await loadImage(it.url)
-    for (const line of it.ann.trim().split('\n').filter(Boolean)) {
-      const [cls, cx, cy, w, h] = line.trim().split(/\s+/).map(Number)
-      if (cls < 0 || cls > 5) continue
+    const gt = it.ann
+      .trim()
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => l.trim().split(/\s+/).map(Number))
+      .filter(([cls]) => cls >= 0 && cls <= 5)
+    for (const [cls, cx, cy, w, h] of gt) {
       crops.push(cropToTensor(img, cx, cy, w, h))
       labels.push(cls)
     }
+    // Sample NEGATIVE (background) crops that don't overlap any die, so the classifier
+    // learns a 7th "not a die" class and can reject the localizer's false boxes.
+    const mw = median(gt.map((g) => g[3]))
+    const mh = median(gt.map((g) => g[4]))
+    const want = Math.min(4, gt.length || 2)
+    let made = 0
+    for (let tries = 0; tries < want * 25 && made < want; tries++) {
+      const cx = 0.08 + Math.random() * 0.84
+      const cy = 0.08 + Math.random() * 0.84
+      const w = mw * (0.7 + Math.random() * 0.6)
+      const h = mh * (0.7 + Math.random() * 0.6)
+      const overlaps = gt.some(([, gx, gy, gw, gh]) => Math.abs(cx - gx) < (w + gw) / 2 && Math.abs(cy - gy) < (h + gh) / 2)
+      if (overlaps) continue
+      crops.push(cropToTensor(img, cx, cy, w, h))
+      labels.push(6) // background
+      made++
+      negCount++
+    }
     if (i % 20 === 0) {
-      log(`<h1>Training data</h1><p>Harvesting crops… image ${i}/${items.length}, ${crops.length} dice so far</p>`)
+      log(`<h1>Training data</h1><p>Harvesting… image ${i}/${items.length}, ${crops.length} crops (${negCount} background)</p>`)
       await tf.nextFrame()
     }
   }
@@ -80,9 +106,11 @@ async function harvest(): Promise<{ xs: tf.Tensor4D; labels: number[] }> {
   return { xs, labels }
 }
 
+const NUM_CLASSES = 7 // faces 1..6 (idx 0..5) + background (idx 6)
+
 function buildModel(): tf.LayersModel {
   const m = tf.sequential()
-  m.add(tf.layers.conv2d({ inputShape: [CROP, CROP, 3], filters: 24, kernelSize: 3, activation: 'relu' }))
+  m.add(tf.layers.conv2d({ inputShape: [CROP, CROP, 1], filters: 24, kernelSize: 3, activation: 'relu' }))
   m.add(tf.layers.maxPooling2d({ poolSize: 2 }))
   m.add(tf.layers.conv2d({ filters: 48, kernelSize: 3, activation: 'relu' }))
   m.add(tf.layers.maxPooling2d({ poolSize: 2 }))
@@ -91,7 +119,7 @@ function buildModel(): tf.LayersModel {
   m.add(tf.layers.flatten())
   m.add(tf.layers.dropout({ rate: 0.35 }))
   m.add(tf.layers.dense({ units: 96, activation: 'relu' }))
-  m.add(tf.layers.dense({ units: 6, activation: 'softmax' }))
+  m.add(tf.layers.dense({ units: NUM_CLASSES, activation: 'softmax' }))
   m.compile({ optimizer: tf.train.adam(0.001), loss: 'categoricalCrossentropy', metrics: ['accuracy'] })
   return m
 }
@@ -115,17 +143,26 @@ async function run() {
   const yTrLabels = trIdx.map((r) => labels[r])
   const yValLabels = valIdx.map((r) => labels[r])
 
-  // Augment TRAIN only with the 4 right-angle rotations (pip COUNT is rotation-invariant),
-  // so the classifier sees dice at every orientation — 4x the data.
+  // Augment TRAIN only. (1) 4 right-angle rotations — pip count is rotation-invariant.
   const angles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2]
   const parts = angles.map((a) => (a === 0 ? xTr.clone() : (tf.image.rotateWithOffset(xTr, a) as tf.Tensor4D)))
-  const xTrAug = tf.concat(parts) as tf.Tensor4D
+  const rotated = tf.concat(parts) as tf.Tensor4D
   parts.forEach((t) => t.dispose())
   xTr.dispose()
-  xTr = xTrAug
+  // (2) Photometric jitter + random INVERT, so the model is brightness/contrast- and
+  // polarity-invariant (works for dark-pips-on-light AND light-pips-on-dark dice).
+  xTr = tf.tidy(() => {
+    const M = rotated.shape[0]
+    const bright = tf.randomUniform([M, 1, 1, 1], -0.15, 0.15)
+    const contrast = tf.randomUniform([M, 1, 1, 1], 0.7, 1.3)
+    const jittered = rotated.sub(0.5).mul(contrast).add(0.5).add(bright).clipByValue(0, 1)
+    const inv = tf.randomUniform([M, 1, 1, 1]).less(0.4).toFloat() // invert ~40%
+    return inv.mul(tf.scalar(1).sub(jittered)).add(tf.scalar(1).sub(inv).mul(jittered)) as tf.Tensor4D
+  })
+  rotated.dispose()
   const yTrAug = angles.flatMap(() => yTrLabels)
-  const yTr = tf.oneHot(tf.tensor1d(yTrAug, 'int32'), 6)
-  const yVal = tf.oneHot(tf.tensor1d(yValLabels, 'int32'), 6)
+  const yTr = tf.oneHot(tf.tensor1d(yTrAug, 'int32'), NUM_CLASSES)
+  const yVal = tf.oneHot(tf.tensor1d(yValLabels, 'int32'), NUM_CLASSES)
 
   const model = buildModel()
   win.__TRAIN__.params = model.countParams()
@@ -148,11 +185,11 @@ async function run() {
     },
   })
 
-  // Confusion matrix on the held-out val set.
+  // Confusion matrix on the held-out val set (7 classes: faces 1-6 + background).
   const predIdx = tf.tidy(() => (model.predict(xVal) as tf.Tensor).argMax(-1))
   const preds = Array.from(await predIdx.data())
   predIdx.dispose()
-  const conf = Array.from({ length: 6 }, () => new Array(6).fill(0))
+  const conf = Array.from({ length: NUM_CLASSES }, () => new Array(NUM_CLASSES).fill(0))
   let correct = 0
   for (let i = 0; i < yValLabels.length; i++) {
     conf[yValLabels[i]][preds[i]]++
@@ -186,15 +223,15 @@ async function run() {
   log(`
     <h1>Tiny top-face classifier — results</h1>
     <p><b>Held-out val accuracy: ${fmt(valAcc)}</b> on ${yValLabels.length} crops · ${N} crops total · ${model.countParams()} params</p>
-    <h3>Per-face accuracy</h3>
-    <p>${perClass.map((a, c) => `face ${c + 1}: <b>${fmt(a)}</b>`).join(' · ')}</p>
-    <h3>Confusion matrix (rows = true face, cols = predicted)</h3>
+    <h3>Per-class accuracy (faces + background-reject)</h3>
+    <p>${perClass.map((a, c) => `${c < 6 ? `face ${c + 1}` : 'bg'}: <b>${fmt(a)}</b>`).join(' · ')}</p>
+    <h3>Confusion matrix (rows = true, cols = predicted)</h3>
     <table style="border-collapse:collapse;font-variant-numeric:tabular-nums">
-      <tr><th></th>${[1, 2, 3, 4, 5, 6].map((c) => `<th style="padding:4px 8px">${c}</th>`).join('')}</tr>
+      <tr><th></th>${['1', '2', '3', '4', '5', '6', 'bg'].map((c) => `<th style="padding:4px 8px">${c}</th>`).join('')}</tr>
       ${conf
         .map(
           (rowArr, r) =>
-            `<tr><th style="padding:4px 8px">${r + 1}</th>${rowArr
+            `<tr><th style="padding:4px 8px">${r < 6 ? r + 1 : 'bg'}</th>${rowArr
               .map((v, c) => `<td style="padding:4px 8px;text-align:center;background:${r === c ? '#d6f5d6' : v ? '#f7d6d6' : '#fff'}">${v}</td>`)
               .join('')}</tr>`,
         )

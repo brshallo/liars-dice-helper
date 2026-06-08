@@ -1,5 +1,5 @@
 import { handrolledEngine } from '../engines/handrolled'
-import { opencvEngine } from '../engines/opencv'
+import { twostageEngine } from '../engines/twostage'
 import type { DiceEngine, DieDetection, DieValue } from '../engines/types'
 import { scoreDice } from './runner'
 
@@ -33,7 +33,6 @@ const items = Object.entries(imgUrls)
   .filter((it) => it.truth && it.truth.length > 0)
 
 const MAXW = 720
-const OPENCV_LIMIT = 40 // opencv is slow (wasm); sample it
 
 const root = document.getElementById('kbench-root')!
 root.style.cssText = 'font-family:system-ui;max-width:1000px;margin:20px auto;padding:0 16px 60px;color:#111'
@@ -106,11 +105,11 @@ async function timed(engine: DiceEngine, c: HTMLCanvasElement) {
 }
 
 async function run() {
-  root.innerHTML = `<h1>Kaggle d6-dice — real-photo benchmark</h1><p>Loading OpenCV + ${items.length} images…</p>`
-  await opencvEngine.load().catch(() => {})
+  root.innerHTML = `<h1>Kaggle d6-dice — real-photo benchmark</h1><p>Loading model + ${items.length} images…</p>`
+  await twostageEngine.load().catch(() => {})
 
   const hr = emptyAgg()
-  const ocv = emptyAgg()
+  const ts = emptyAgg()
   const examples: { c: HTMLCanvasElement; dice: DieDetection[]; truth: DieValue[]; name: string }[] = []
 
   for (let i = 0; i < items.length; i++) {
@@ -118,12 +117,10 @@ async function run() {
     const c = await loadCanvas(it.url)
     const r = await timed(handrolledEngine, c)
     accumulate(hr, r.dice, it.truth, r.ms)
-    if (i < OPENCV_LIMIT) {
-      const ro = await timed(opencvEngine, c)
-      accumulate(ocv, ro.dice, it.truth, ro.ms)
-    }
-    if (examples.length < 6) examples.push({ c, dice: r.dice, truth: it.truth, name: it.name })
-    if (i % 15 === 0) root.firstChild!.nextSibling!.textContent = `Processed ${i}/${items.length}…`
+    const rt = await timed(twostageEngine, c)
+    accumulate(ts, rt.dice, it.truth, rt.ms)
+    if (examples.length < 6) examples.push({ c, dice: rt.dice, truth: it.truth, name: it.name })
+    if (i % 10 === 0) root.firstChild!.nextSibling!.textContent = `Processed ${i}/${items.length}…`
   }
 
   const summarize = (a: Agg, label: string) => `
@@ -146,11 +143,11 @@ async function run() {
         <th>Extra/img</th><th>Avg dice pred vs true</th><th>Mean ms</th>
       </tr></thead>
       <tbody>
-        ${summarize(hr, 'Hand-rolled (all)')}
-        ${summarize(ocv, `OpenCV (first ${OPENCV_LIMIT})`)}
+        ${summarize(ts, 'Two-stage (CV + CNN)')}
+        ${summarize(hr, 'Hand-rolled (pip count)')}
       </tbody>
     </table>
-    <h2 style="margin-top:24px">Example reads (hand-rolled overlay)</h2>
+    <h2 style="margin-top:24px">Example reads (two-stage overlay)</h2>
     <div id="kbench-examples" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>`
 
   const grid = document.getElementById('kbench-examples')!
@@ -168,10 +165,8 @@ async function run() {
     grid.appendChild(fig)
   }
 
-  ;(window as unknown as { __KBENCH__: unknown }).__KBENCH__ = {
-    hr: { perDie: hr.matched / hr.trueTotal, exact: hr.exact / hr.images, extraPerImg: hr.extra / hr.images, avgPred: hr.predTotal / hr.images, avgTrue: hr.trueTotal / hr.images, images: hr.images },
-    ocv: { perDie: ocv.matched / ocv.trueTotal, exact: ocv.exact / ocv.images, extraPerImg: ocv.extra / ocv.images, avgPred: ocv.predTotal / ocv.images, avgTrue: ocv.trueTotal / ocv.images, images: ocv.images },
-  }
+  const summary = (a: Agg) => ({ perDie: a.matched / a.trueTotal, exact: a.exact / a.images, extraPerImg: a.extra / a.images, avgPred: a.predTotal / a.images, avgTrue: a.trueTotal / a.images, images: a.images })
+  ;(window as unknown as { __KBENCH__: unknown }).__KBENCH__ = { twostage: summary(ts), hr: summary(hr) }
 }
 
 run()
