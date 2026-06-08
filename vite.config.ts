@@ -3,6 +3,11 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import basicSsl from '@vitejs/plugin-basic-ssl'
+
+// `npm run dev:https` (HTTPS=true) serves over self-signed HTTPS so the camera works
+// on a phone over the LAN (getUserMedia needs a secure context; plain http LAN is blocked).
+const useHttps = process.env.HTTPS === 'true'
 
 // https://vite.dev/config/
 // Installable PWA (offline static app) + vitest config for the pure engine in src/lib.
@@ -22,6 +27,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    ...(useHttps ? [basicSsl()] : []),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],

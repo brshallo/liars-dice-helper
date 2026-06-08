@@ -1,10 +1,47 @@
 # Dice Capture — recognition engine bake-off
 
 Isolated R&D for the photo-capture stretch goal: read the user's own dice (face values 1–6) from
-a camera/photo, fast and reliably across different dice, colours, and lighting, with a manual
-fallback. **All of this lives on the `dice-capture` branch and is NOT wired into the app** — the
-main app at `/` imports nothing from here. Two extra Vite entries drive it:
+a camera/photo. **Lives on the `dice-capture` branch, NOT wired into the app** — the main app at `/`
+imports nothing here.
 
+---
+
+## ▶ RESUME HERE — pick this up later & finalize the approach
+
+**Goal of the next session:** test the live capture with real dice, compare the engines, and decide:
+ship the **two-stage + live fusion** (built, lightweight) or invest in a **YOLO detector** (heavier,
+more robust). See the [verdict](#verdict-revised-after-real-photo-testing) for the tradeoff.
+
+**Run it**
+```
+git checkout dice-capture
+npm install
+npm run dev          # Mac testing — camera works at http://localhost:5173/ (localhost = secure)
+npm run dev:https    # PHONE testing — https://<LAN-ip>:5173 (accept the self-signed cert once);
+                     #   camera needs HTTPS on a LAN, plain http is blocked. Same Wi-Fi, no tunnel.
+```
+
+**Pages to try** (all dev-only, on the `dice-capture` branch):
+| URL | What it is |
+|---|---|
+| `/capture-lab.html` | **The candidate UX.** Live guided camera scan (default = two-stage engine): point at dice, it guides + fuses many frames, auto-finishes, fills an editable grid. Switch the engine tabs to compare. Upload also works for no-camera testing. |
+| `/kbench.html` | Quantitative benchmark on the **250 real Kaggle d6-dice photos** (two-stage vs hand-rolled, scored against YOLO labels). The reliable accuracy number. |
+| `/realbench.html` | 8 hand-labelled real phone photos with overlays (a *different* dice style — the generalization test). |
+| `/bench.html` | Synthetic-image benchmark of the classic engines. |
+| `/train.html` | Re-train the tiny TF.js classifier in-browser (dev tool); it re-saves `public/models/dice-classifier/`. |
+
+**What to look for when testing with dice:** does the live scan's **fusion** stabilize on the right
+read across angles? On *your* dice (not the training set)? If yes → two-stage is enough. If the
+per-die read is too wrong → go to the YOLO detector (the "PyTorch fallback", scoped below; torch is
+already verified working on this machine).
+
+**Local data needed** (gitignored — re-fetch if missing): `data/d6-dice/` (Kaggle, see its
+`SOURCE.md` and `~/work/customize/kaggle-access.md`) and `src/capture/bench/samples/*.jpg` (a few real
+photos). The trained model in `public/models/` IS committed. Milestone history: M1–M3 in git log.
+
+---
+
+Two extra Vite entries originally drove it:
 - `/capture-lab.html` → live lab: camera/upload → recognise → overlay → editable dice grid.
 - `/bench.html` → the benchmark: runs every engine over a synthetic labelled suite and scores it.
 
