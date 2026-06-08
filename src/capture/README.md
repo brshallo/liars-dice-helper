@@ -78,6 +78,24 @@ better (≈44% on the Kaggle subset, with many false dice).
      real photos, at the cost of a ~5–20 MB model download + a training/conversion step. This is the
      "other option" if confirm-first isn't good enough. See `engines/ml/FINDINGS.md`.
 
+## Chosen approach: in-browser two-stage (being built)
+Classic-CV die **localizer** + a tiny **top-face classifier** (TF.js CNN, ~95K params / ~370 KB),
+trained in the browser on ~1795 die crops harvested from d6-dice (`train.html`). Held-out per-face
+accuracy **~94%** *per single crop*; a live multi-frame camera flow fuses reads across frames/angles
+to lift end-to-end accuracy and guide the user. No Python, fully offline, tiny model.
+
+### PyTorch fallback — cost, if the two-stage disappoints
+Local training **is** feasible here (verified: torch 2.12 on Python 3.14, CPU build + **MPS/Metal**
+GPU — no CUDA, since that's Linux/NVIDIA-only). The fallback would be: train a small detector
+(YOLOv8n) on d6-dice in PyTorch (MPS-accelerated, ~30–60 min on ~250 imgs w/ transfer learning) →
+export to the browser. Rough client cost:
+- **ONNX + onnxruntime-web:** model ~6–12 MB + the ort-web wasm runtime ~3–10 MB → **~10–20 MB** added,
+  lazy-loaded only in capture.
+- **or TF.js graph model:** similar model size, reusing the TF.js runtime already pulled in for the
+  classifier (~2–3 MB) → a bit lighter.
+Versus the two-stage's ~370 KB model. Only worth it if M1/M2 can't be made reliable enough — decide
+with the user before building it.
+
 ## How real photos were tested
 - `realbench.html` — 8 hand-labelled phone photos (a few dice on felt) with overlays.
 - `kbench.html` — the 250-image Kaggle **d6-dice** set; parses the YOLO `.txt` labels (class 0–5 =
