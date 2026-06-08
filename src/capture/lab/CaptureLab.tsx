@@ -1,30 +1,44 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import { engines, faceCounts } from '../engines'
-import type { DieValue, RecognizeResult } from '../engines'
+import { twostageEngine } from '../engines/twostage'
+import type { DieValue, DiceEngine, RecognizeResult } from '../engines'
 import './CaptureLab.css'
 
-/** Cap the working canvas width for perf; the overlay scales back up to display size. */
 const MAX_WIDTH = 640
 const FACES: DieValue[] = [1, 2, 3, 4, 5, 6]
-
-/** Unicode die faces, just for the editable grid labels. */
-const FACE_GLYPH: Record<DieValue, string> = {
-  1: '⚀',
-  2: '⚁',
-  3: '⚂',
-  4: '⚃',
-  5: '⚄',
-  6: '⚅',
-}
+const FACE_GLYPH: Record<DieValue, string> = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' }
 
 type Counts = Record<DieValue, number>
 const EMPTY_COUNTS: Counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 }
 
+// Multi-frame fusion: dice are static while the camera moves, so we look for a stable
+// CONSENSUS over the recent frames rather than trusting a single (possibly bad) frame.
+const BUFFER = 15 // frames remembered
+const STABLE_NEED = 9 // identical reads needed in the buffer to auto-finish
+
+/** The selectable engines (two-stage CNN first — the one this flow is built around). */
+const LAB_ENGINES: DiceEngine[] = [twostageEngine, ...engines.filter((e) => e.key !== 'manual')]
+
+const signature = (dice: { value: DieValue }[]) =>
+  dice
+    .map((d) => d.value)
+    .sort((a, b) => a - b)
+    .join(',')
+
+const countsFromSig = (sig: string): Counts => {
+  const c = { ...EMPTY_COUNTS }
+  if (sig) for (const v of sig.split(',')) c[Number(v) as DieValue]++
+  return c
+}
+
 export function CaptureLab(): JSX.Element {
-  // Default engine = the benchmark winner.
-  const [engineKey, setEngineKey] = useState('handrolled')
-  const engine = engines.find((e) => e.key === engineKey) ?? engines[0]
+  const [engineKey, setEngineKey] = useState('twostage')
+  const engine = LAB_ENGINES.find((e) => e.key === engineKey) ?? LAB_ENGINES[0]
+  const engineRef = useRef<DiceEngine>(engine)
+  useEffect(() => {
+    engineRef.current = engine
+  }, [engine])
 
   const [cameraOn, setCameraOn] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -33,82 +47,30 @@ export function CaptureLab(): JSX.Element {
   const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS)
   const [hasImage, setHasImage] = useState(false)
 
+  // Live-scan state
+  const [guidance, setGuidance] = useState('')
+  const [stability, setStability] = useState(0)
+  const scanningRef = useRef(false)
+  const bufferRef = useRef<string[]>([])
+
   const videoRef = useRef<HTMLVideoElement>(null)
-  // Off-screen working canvas: the downscaled source the engine actually reads.
   const workCanvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'))
-  // On-screen display canvas: source image + detection overlay, drawn at work size.
   const displayCanvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  // --- camera lifecycle ----------------------------------------------------
-  // Keep the stream in a ref (not state) so cleanup never depends on a stale render.
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
-    setCameraOn(false)
-  }, [])
-
-  // Always stop the camera when the component unmounts (back button, route change…).
-  useEffect(() => stopCamera, [stopCamera])
-
-  const startCamera = useCallback(async () => {
-    setCameraError(null)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      })
-      streamRef.current = stream
-      setCameraOn(true)
-      // The <video> mounts in the same render; attach on the next tick.
-      requestAnimationFrame(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          void videoRef.current.play()
-        }
-      })
-    } catch {
-      // Permission denied / no camera: fall back to upload with a friendly note.
-      setCameraError('Camera unavailable or permission denied. Use "Upload photo" instead.')
-      setCameraOn(false)
-    }
-  }, [])
-
-  // --- drawing + recognition ----------------------------------------------
-  /** Draw a source (image/video) into the work canvas at <=MAX_WIDTH, preserving aspect. */
+  // --- drawing helpers -----------------------------------------------------
   const drawToWork = useCallback((src: HTMLImageElement | HTMLVideoElement, sw: number, sh: number) => {
     const scale = Math.min(1, MAX_WIDTH / sw)
-    const w = Math.round(sw * scale)
-    const h = Math.round(sh * scale)
     const work = workCanvasRef.current
-    work.width = w
-    work.height = h
-    work.getContext('2d')!.drawImage(src, 0, 0, w, h)
+    work.width = Math.round(sw * scale)
+    work.height = Math.round(sh * scale)
+    work.getContext('2d')!.drawImage(src, 0, 0, work.width, work.height)
   }, [])
 
-  /** Run the active engine on the work canvas and seed the editable grid. */
-  const runRecognition = useCallback(async () => {
-    const work = workCanvasRef.current
-    if (!work.width) return
-    setRunning(true)
-    try {
-      await engine.load()
-      const res = await engine.recognize(work)
-      setResult(res)
-      setCounts(faceCounts(res.dice) as Counts)
-      drawOverlay(res)
-    } finally {
-      setRunning(false)
-    }
-    // drawOverlay is defined below and is stable enough for this experiment.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engine])
-
-  /** Paint the work image plus each detection bbox onto the display canvas. */
   const drawOverlay = useCallback((res: RecognizeResult | null) => {
     const display = displayCanvasRef.current
     const work = workCanvasRef.current
     if (!display || !work.width) return
-    // Display canvas matches the work canvas 1:1, so bbox pixel coords map directly.
     display.width = work.width
     display.height = work.height
     const ctx = display.getContext('2d')!
@@ -120,7 +82,6 @@ export function CaptureLab(): JSX.Element {
     for (const d of res.dice) {
       if (!d.bbox) continue
       const [x, y, w, h] = d.bbox
-      // Canvas can't read CSS vars, so the palette colors are inlined here (--accent / --good).
       ctx.strokeStyle = '#3fb8af'
       ctx.strokeRect(x, y, w, h)
       const label = String(d.value)
@@ -132,44 +93,134 @@ export function CaptureLab(): JSX.Element {
     }
   }, [])
 
-  // --- input handlers ------------------------------------------------------
-  const captureFrame = useCallback(async () => {
+  // --- camera + live scan --------------------------------------------------
+  const stopScan = useCallback(() => {
+    scanningRef.current = false
+  }, [])
+
+  const stopCamera = useCallback(() => {
+    stopScan()
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    streamRef.current = null
+    setCameraOn(false)
+  }, [stopScan])
+
+  useEffect(() => stopCamera, [stopCamera])
+
+  /** Commit a fused result: set the grid, freeze the last frame, stop the camera. */
+  const finishScan = useCallback(
+    (sig: string, lastRes: RecognizeResult | null) => {
+      stopScan()
+      setCounts(countsFromSig(sig))
+      if (lastRes) setResult(lastRes)
+      setHasImage(true)
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+      setCameraOn(false)
+      setGuidance('Got it — check the count below.')
+    },
+    [stopScan],
+  )
+
+  const scanLoop = useCallback(async () => {
+    if (!scanningRef.current) return
     const video = videoRef.current
-    if (!video || !video.videoWidth) return
-    drawToWork(video, video.videoWidth, video.videoHeight)
-    setHasImage(true)
-    stopCamera() // freeze the shot; no need to keep the camera live
-    await runRecognition()
-  }, [drawToWork, runRecognition, stopCamera])
+    if (video && video.videoWidth) {
+      try {
+        drawToWork(video, video.videoWidth, video.videoHeight)
+        const res = await engineRef.current.recognize(workCanvasRef.current)
+        drawOverlay(res)
+        setResult(res)
+
+        // Fusion: track the consensus signature over the recent frames.
+        const buf = bufferRef.current
+        buf.push(signature(res.dice))
+        if (buf.length > BUFFER) buf.shift()
+        const tally = new Map<string, number>()
+        for (const s of buf) tally.set(s, (tally.get(s) ?? 0) + 1)
+        let topSig = ''
+        let topCount = 0
+        for (const [s, n] of tally) if (n > topCount) ((topSig = s), (topCount = n))
+        setStability(topCount / BUFFER)
+
+        if (buf.length < BUFFER) {
+          setGuidance('Scanning… hold the camera over your dice.')
+        } else if (topSig === '') {
+          setGuidance('No dice detected — move closer, better light, plainer surface.')
+        } else if (topCount >= STABLE_NEED) {
+          finishScan(topSig, res)
+          return
+        } else {
+          setGuidance('Hold steady & spread the dice apart…')
+        }
+      } catch {
+        /* a dropped frame is fine; keep scanning */
+      }
+    }
+    if (scanningRef.current) setTimeout(scanLoop, 110)
+  }, [drawToWork, drawOverlay, finishScan])
+
+  const startCamera = useCallback(async () => {
+    setCameraError(null)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      setCameraOn(true)
+      setHasImage(false)
+      bufferRef.current = []
+      setStability(0)
+      setGuidance('Starting camera…')
+      requestAnimationFrame(async () => {
+        if (!videoRef.current) return
+        videoRef.current.srcObject = stream
+        await videoRef.current.play().catch(() => {})
+        await engineRef.current.load()
+        scanningRef.current = true
+        void scanLoop()
+      })
+    } catch {
+      setCameraError('Camera unavailable or permission denied. Use "Upload photo" instead.')
+      setCameraOn(false)
+    }
+  }, [scanLoop])
+
+  // --- single-shot upload path (still useful for testing) ------------------
+  const runOnce = useCallback(async () => {
+    const work = workCanvasRef.current
+    if (!work.width) return
+    setRunning(true)
+    try {
+      await engineRef.current.load()
+      const res = await engineRef.current.recognize(work)
+      setResult(res)
+      setCounts(faceCounts(res.dice) as Counts)
+      drawOverlay(res)
+    } finally {
+      setRunning(false)
+    }
+  }, [drawOverlay])
 
   const onFile = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
+      stopCamera()
       const img = new Image()
       img.onload = async () => {
         drawToWork(img, img.naturalWidth, img.naturalHeight)
         setHasImage(true)
         URL.revokeObjectURL(img.src)
-        await runRecognition()
+        await runOnce()
       }
       img.src = URL.createObjectURL(file)
-      // Reset so picking the same file again re-fires onChange.
       e.target.value = ''
     },
-    [drawToWork, runRecognition],
+    [drawToWork, runOnce, stopCamera],
   )
-
-  // Re-run when the engine changes (only if we already have an image).
-  useEffect(() => {
-    if (hasImage) void runRecognition()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engineKey])
 
   // --- editable grid -------------------------------------------------------
   const bump = (face: DieValue, delta: number) =>
     setCounts((c) => ({ ...c, [face]: Math.max(0, c[face] + delta) }))
-
   const total = FACES.reduce((s, f) => s + counts[f], 0)
 
   return (
@@ -177,17 +228,16 @@ export function CaptureLab(): JSX.Element {
       <header className="lab-head">
         <h1>Dice Capture Lab</h1>
         <p className="muted">
-          Isolated experiment, not wired into the app. Capture or upload a photo of your dice; the
-          active engine reads the faces, and you correct any miscounts below (or enter dice by hand
-          if detection is off). In the app this would fill your held dice.
+          Point the camera at your dice — it reads continuously, guides you, and fuses many frames so
+          a single bad angle doesn&apos;t matter. It auto-finishes on a stable read; fix any miscount
+          below.
         </p>
       </header>
 
-      {/* Engine selector */}
       <section className="lab-section">
         <div className="lab-label">Engine</div>
         <div className="engine-row">
-          {engines.map((e) => (
+          {LAB_ENGINES.map((e) => (
             <button
               key={e.key}
               className={e.key === engineKey ? 'engine-tab active' : 'engine-tab'}
@@ -199,14 +249,15 @@ export function CaptureLab(): JSX.Element {
         </div>
       </section>
 
-      {/* Input controls */}
       <section className="lab-section">
         <div className="input-row">
           {!cameraOn ? (
-            <button onClick={startCamera}>Use camera</button>
+            <button onClick={startCamera} className="primary">
+              Scan with camera
+            </button>
           ) : (
-            <button onClick={captureFrame} className="primary">
-              Capture
+            <button onClick={() => finishScan(signature(result?.dice ?? []), result)} className="primary">
+              Use this read
             </button>
           )}
           <label className="upload-btn">
@@ -215,37 +266,39 @@ export function CaptureLab(): JSX.Element {
           </label>
           {cameraOn && (
             <button onClick={stopCamera} className="ghost">
-              Cancel
+              Stop
             </button>
           )}
         </div>
         {cameraError && <p className="lab-error">{cameraError}</p>}
       </section>
 
-      {/* Live camera preview */}
+      {/* Live scan guidance + stability meter */}
       {cameraOn && (
         <section className="lab-section">
-          <video ref={videoRef} className="media" playsInline muted />
+          <video ref={videoRef} className="media hidden-video" playsInline muted />
+          <div className="scan-guidance">{guidance}</div>
+          <div className="scan-meter" aria-label="read stability">
+            <div className="scan-meter-fill" style={{ width: `${Math.round(stability * 100)}%` }} />
+          </div>
         </section>
       )}
 
-      {/* Result image + overlay */}
       <section className="lab-section">
         <div className="canvas-wrap">
           <canvas ref={displayCanvasRef} className="media" />
           {!hasImage && !cameraOn && (
-            <div className="canvas-empty muted">No image yet — capture or upload one.</div>
+            <div className="canvas-empty muted">No image yet — scan or upload.</div>
           )}
           {running && <div className="canvas-spinner">Reading dice…</div>}
         </div>
-        {result && (
+        {result && !cameraOn && (
           <p className="muted lab-meta">
-            {engine.name} · {result.dice.length} die/dice detected · {result.ms.toFixed(1)} ms
+            {engine.name} · {result.dice.length} die/dice · {result.ms.toFixed(0)} ms/frame
           </p>
         )}
       </section>
 
-      {/* Editable face-count grid = manual correction / manual entry */}
       <section className="lab-section">
         <div className="lab-label">
           Your dice <span className="muted">(correct the auto-count, or enter by hand)</span>

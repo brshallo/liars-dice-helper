@@ -166,3 +166,25 @@
   margin: 0;
   font-size: 0.95rem;
 }
+
+/* Live-scan guidance + stability meter (M3) */
+.hidden-video {
+  display: none; /* the video is just a frame source; the overlay canvas is shown instead */
+}
+.scan-guidance {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.scan-meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2, #212c38);
+  overflow: hidden;
+}
+.scan-meter-fill {
+  height: 100%;
+  background: var(--accent, #3fb8af);
+  border-radius: 999px;
+  transition: width 0.12s linear;
+}

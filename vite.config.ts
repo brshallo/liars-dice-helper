@@ -25,11 +25,23 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
-      // dice-capture branch: the experiment entries (lab/bench) pull in the ~10MB
-      // OpenCV wasm chunk. Keep those out of the shipped app's service-worker precache
-      // so the PWA stays small — they're R&D, not part of the app.
+      // dice-capture branch: the experiment entries (lab/bench/train) pull in big chunks
+      // (OpenCV wasm ~10MB, TF.js ~880KB) + the model. The main app never loads them, so
+      // keep them all out of the shipped app's service-worker precache — they're R&D.
       workbox: {
-        globIgnores: ['**/engines-*.js', '**/bench-*.js', '**/capture-lab-*.js'],
+        globIgnores: [
+          '**/engines-*.js',
+          '**/twostage-*.js',
+          '**/bench-*.js',
+          '**/capture-lab-*.js',
+          '**/realbench-*.js',
+          '**/kbench-*.js',
+          'bench.html',
+          'capture-lab.html',
+          'realbench.html',
+          'kbench.html',
+          'models/**',
+        ],
       },
       manifest: {
         name: "Liar's Dice Helper",
