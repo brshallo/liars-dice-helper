@@ -46,11 +46,16 @@
   padding-right: 2px;
 }
 
-/* The corner doubles as the info button — strip the global button chrome so it's
-   just a subtle icon tucked in the top-left, not blocking any numbers. */
+/* The corner doubles as the info button: a small "probability" label + the (i),
+   tucked in the top-left. Small font + overflow-hidden keep it from widening the
+   frozen faces column into the bid cells. */
 .matrix-info {
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
   padding: 0;
+  overflow: hidden;
   background: none;
   border: none;
   color: var(--text-dim);
@@ -60,8 +65,16 @@
   background: none;
   color: var(--accent);
 }
+.matrix-info-label {
+  font-size: 0.6rem;
+  line-height: 1;
+  white-space: nowrap;
+}
 .matrix-info svg {
   display: block;
+  width: 13px;
+  height: 13px;
+  flex: none;
 }
 
 /* Row label (frozen pane) */
