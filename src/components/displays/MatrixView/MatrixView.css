@@ -46,6 +46,24 @@
   padding-right: 2px;
 }
 
+/* The corner doubles as the info button — strip the global button chrome so it's
+   just a subtle icon tucked in the top-left, not blocking any numbers. */
+.matrix-info {
+  justify-items: start;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.matrix-info:hover {
+  background: none;
+  color: var(--accent);
+}
+.matrix-info svg {
+  display: block;
+}
+
 /* Row label (frozen pane) */
 .matrix-rowhead {
   height: var(--row-h);

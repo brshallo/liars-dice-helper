@@ -34,21 +34,10 @@ export function ProbabilityPanel({ panel, onSelectBid }: Props): JSX.Element {
   }
 
   return (
-    <section className="prob-panel">
-      <div className="prob-toolbar">
-        <h2 className="prob-title">Probabilities</h2>
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label="What do these mean?"
-          title="What do these mean?"
-          onClick={() => setInfo(true)}
-        >
-          <InfoIcon />
-        </button>
-      </div>
-
-      <MatrixView panel={panel} onSelectBid={selectAndInspect} />
+    <section className="prob-panel" aria-label="Probabilities">
+      {/* No title row — the matrix is self-evidently the probabilities. The (i)
+          lives in the matrix's top-left corner cell (otherwise dead space). */}
+      <MatrixView panel={panel} onSelectBid={selectAndInspect} onInfo={() => setInfo(true)} />
 
       {info && (
         <Modal title="Reading the probabilities" onClose={() => setInfo(false)}>
@@ -163,12 +152,3 @@ function InfoContent(): JSX.Element {
   )
 }
 
-function InfoIcon(): JSX.Element {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <circle cx="12" cy="8" r="1.3" fill="currentColor" />
-      <path d="M12 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}

@@ -8,35 +8,6 @@
   gap: 6px;
 }
 
-.prob-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.prob-title {
-  font-size: 1rem;
-  font-weight: 650;
-}
-.prob-tools {
-  display: flex;
-  gap: 6px;
-}
-
-.icon-btn {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  color: var(--text-dim);
-  background: var(--surface-2);
-}
-.icon-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent-dim);
-}
-
 /* Info modal — visual-first. */
 .info-lead {
   margin: 0 0 16px;
