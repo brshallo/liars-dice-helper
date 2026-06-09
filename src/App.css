@@ -57,7 +57,7 @@
   color: var(--text);
 }
 .variant-badge.is-wild {
-  color: #10161c;
+  color: var(--badge-wild-text);
   background: var(--warn);
   border-color: var(--warn);
 }
