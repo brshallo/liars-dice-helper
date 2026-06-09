@@ -1,4 +1,4 @@
-# Liar's Dice Helper
+# Liar's Dice Cheat Sheet
 
 A browser app (installable PWA) to assist while playing Liar's Dice: track every player's dice
 count around a table and see the live probability that a bid ("at least *q* of a face") is true —

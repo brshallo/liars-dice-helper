@@ -26,7 +26,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-title">
-          <h1>Liar&apos;s Dice Helper</h1>
+          <h1>Liar&apos;s Dice Cheat Sheet</h1>
           <button
             type="button"
             className={`variant-badge${isWild ? ' is-wild' : ''}`}

@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: "Liar's Dice Helper",
+        name: "Liar's Dice Cheat Sheet",
         short_name: "Liar's Dice",
-        description: "Live probability helper for Liar's Dice (no wilds).",
+        description: "Live probability for Liar's Dice — track each player's dice and see how likely a bid is true.",
         theme_color: '#0e1419',
         background_color: '#0e1419',
         display: 'standalone',

@@ -23,13 +23,17 @@
   min-width: 0; /* allow the title group to shrink so New game stays on this line */
 }
 .app-title h1 {
-  font-size: clamp(1.05rem, 0.9rem + 1.2vw, 1.7rem);
+  /* Sized to keep title + badge + New game on one line down to ~360px-wide phones. */
+  font-size: clamp(0.72rem, 0.5rem + 1.1vw, 1.5rem);
   letter-spacing: -0.5px;
   white-space: nowrap;
 }
 .app-header .primary {
   flex: none;
   white-space: nowrap;
+}
+.variant-badge {
+  flex: none; /* never let the title squeeze/clip the badge */
 }
 
 /* Game-type badge — always visible so the variant is never ambiguous, and a tap
