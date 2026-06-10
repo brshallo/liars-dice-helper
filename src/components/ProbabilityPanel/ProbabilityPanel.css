@@ -131,6 +131,16 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* Probability notation, e.g. P(≥3 ⚄) — kept on one line, die a touch larger. */
+.info-notation {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.info-die {
+  font-size: 1.15em;
+  line-height: 1;
+}
 
 /* Two-column grid shared across all rows: tokens in a max-content column (so the
    descriptions all start at the same x), descriptions wrapping in the rest. */

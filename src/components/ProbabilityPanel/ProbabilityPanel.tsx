@@ -136,7 +136,13 @@ function InfoContent(): JSX.Element {
               82%
             </span>
           </span>
-          <span className="info-key-text">The chance that bid is true.</span>
+          <span className="info-key-text">
+            The chance that bid is true,{' '}
+            <span className="info-notation" aria-label="probability of at least three fives">
+              P(≥&thinsp;3 <span className="info-die">⚄</span>)
+            </span>
+            .
+          </span>
         </li>
       </ul>
 
