@@ -22,6 +22,33 @@ matched the current UI during testing); that styling is fine — it's the **reco
 
 ---
 
+## ⏸ PARKED AGAIN (2026-06-10) — works-in-principle, but the goal changed
+
+Attempt #2 below (Claude vision via BYO API key) was built and its pipeline verified, but before
+real-dice testing the goal shifted: capture should be **generally usable — no API key to paste,
+no per-use cost to the app owner**. A pasted key fails that bar, so the branch is parked with
+these next steps (also in session memory):
+
+1. **After 2026-06-15 — "Sign in with Claude".** Anthropic's Agent SDK monthly credit starts then
+   and covers third-party apps that authenticate with the *user's* Claude subscription
+   (support.claude.com article 15036540). Check whether app/OAuth registration opens to indie
+   devs. Caveats: needs a small backend (Agent SDK is Node/Python, not browser), users need a
+   paid plan, and pre-June-15 consumer-OAuth-in-third-party-tools was a ToS violation — don't
+   build until the sanctioned path is public. (OpenAI's "Sign in with ChatGPT": interest-form only.)
+2. **Test Moondream cloud as a free default engine.** Tiny VLM with native counting/detection
+   skills; cloud API has $5/mo free credits per workspace (≈ thousands of dice reads). Blast
+   radius of a shared free-tier key = quota, not money. **Empirically test face-reading accuracy
+   on real dice photos before building around it** — that's the lesson of this branch.
+3. **Local YOLO retrain = last resort.** Public dice datasets are small (Roboflow Universe:
+   132–857 imgs each, ~1.5–2k aggregated); meeting the "much better than last time" bar is a
+   real training project.
+
+The Claude-vision page stays fully working for BYO-key use: `npm run dev`, open
+`http://<LAN-ip>:5173/vision.html` (plain http is fine — no getUserMedia), paste an Anthropic
+key once. It doubles as the accuracy benchmark to judge Moondream against.
+
+---
+
 ## 🔄 REOPENED (2026-06-10): greenfield attempt #2 — Claude vision API
 
 New engine in `src/capture/vision/` with its own page at **`/vision.html`** (Vite entry `vision`,
@@ -40,7 +67,7 @@ Capture is a **native camera still** (`<input capture="environment">`), not getU
 works over plain-http LAN (`npm run dev`, no self-signed cert dance) and gets a full-res photo.
 
 **Status: built; pipeline verified end-to-end minus auth (browser→API CORS works; a fake key gets
-a clean "key rejected" error). Awaiting real-dice testing on-device.**
+a clean "key rejected" error). Never tested on real dice — parked first (see banner above).**
 
 ---
 
