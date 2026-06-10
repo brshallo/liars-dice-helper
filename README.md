@@ -4,12 +4,22 @@ A browser app (installable PWA) to assist while playing Liar's Dice: track every
 count around a table and see the live probability that a bid ("at least *q* of a face") is true —
 sharpened once you enter the dice in your own hand.
 
+### ▶ [**Open the app →**](https://brshallo.github.io/liars-dice-helper/)
+Runs in any phone or desktop browser (no install needed). Add it to your home screen to use it like an app.
+
+<p align="center">
+  <img src="docs/app-table.png" alt="The table and probability matrix" width="300" />
+  &nbsp;&nbsp;
+  <img src="docs/app-held.png" alt="Probabilities sharpened once you enter your own dice" width="300" />
+</p>
+<p align="center"><sub>The round table + live probability matrix · and the same matrix sharpened once you enter your own dice (blue <b>+N</b> = dice you hold).</sub></p>
+
 > **Look:** "Modern Editorial" theme — warm paper, ink, one vermilion accent, Instrument Serif
 > display + Hanken Grotesk body. The visual system is fully tokenized in `src/index.css`.
 
-> **Status:** Built and working. Manual dice entry, the probability engine (no-wilds **and**
-> 1s-wild), the 2–10 player table, and the probability panel are all live, installable as a PWA.
-> Camera capture of your dice was prototyped separately — see [Photo capture](#photo-capture-experiment).
+> **Status:** Built and working — manual dice entry, the probability engine (no-wilds **and**
+> 1s-wild), the 2–10 player table, and the probability matrix, installable as a PWA. Photo-capture of
+> your dice was attempted on a side branch but **didn't pan out** — see [Photo capture](#photo-capture-experiment).
 
 ## Features
 - **2–10 players, 1–10 dice each.** New game opens a dialog (players / dice / variant).
@@ -49,9 +59,9 @@ src/
     grouping.ts        # collapse faces into groups that share a distribution
     window.ts          # auto-window: the band of bid quantities worth showing
   state/               # reducer (players, dice, held dice, bid, variant) + derivePanel() selector
-  ui/                  # probability colour scale, formatting helpers, dark theme tokens
+  ui/                  # probability colour scale, formatting helpers, editorial theme tokens
   components/
-    PlayerTable/       # oval table: drag-your-seat, rename, +/- dice, elimination
+    PlayerTable/       # round table: drag-your-seat, rename, +/- dice, elimination
     Controls/          # NewGameButton (dialog) + YourDice entry
     ProbabilityPanel/  # the matrix + the (i) info and bid-inspector modals
     displays/          # MatrixView (heatmap) + InspectorView (focused single bid)
@@ -72,9 +82,10 @@ P(≥ q of f) = 1 − BinomialCDF(q − floor − 1 ; U , matchProb)
 
 Faces that share the same `(floor, matchProb)` collapse into one matrix row.
 
-## Photo capture (experiment)
-The original stretch goal — read your dice from a photo — was prototyped on the **`dice-capture`
-branch** (not merged, not wired into the app). It's an isolated bake-off of three recognition
-engines against a synthetic labelled benchmark; the dependency-free hand-rolled detector won. See
-`src/capture/README.md` on that branch.
+## Photo capture (experiment — didn't pan out)
+The original stretch goal — read your dice from a photo so the conditional probabilities fill in
+automatically — was prototyped on the **`dice-capture` branch** (never merged, never wired into the
+app). It tried classic computer vision (pip-counting, OpenCV) and a two-stage CNN with live
+multi-frame fusion. On-device testing with real dice, **none of the approaches were good enough**, so
+it's parked — manual dice entry is the shipped path. Write-up: `src/capture/README.md` on that branch.
 

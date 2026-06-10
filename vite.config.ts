@@ -5,7 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 // Installable PWA (offline static app) + vitest config for the pure engine in src/lib.
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Served from a GitHub Pages project site (brshallo.github.io/liars-dice-helper/) in
+  // production; kept at '/' for local dev so the dev/LAN URLs stay clean.
+  base: command === 'build' ? '/liars-dice-helper/' : '/',
   plugins: [
     react(),
     VitePWA({
@@ -36,4 +39,4 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.ts',
   },
-})
+}))
