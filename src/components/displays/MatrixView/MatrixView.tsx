@@ -9,6 +9,8 @@ interface DisplayProps {
   panel: PanelData
   /** Call when the user taps a cell to set the live bid. */
   onSelectBid: (bid: Bid) => void
+  /** If given, the top-left corner cell becomes an info button instead of the "≥" mark. */
+  onInfo?: () => void
 }
 
 /**
@@ -16,7 +18,7 @@ interface DisplayProps {
  * probability cells in a separate scrolling pane — so the horizontal scrollbar spans
  * only the numbers, not the faces. Cells start scrolled to the expected-count column.
  */
-export function MatrixView({ panel, onSelectBid }: DisplayProps): JSX.Element {
+export function MatrixView({ panel, onSelectBid, onInfo }: DisplayProps): JSX.Element {
   const { quantities } = panel.window
   const bid = panel.currentBid
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -43,9 +45,25 @@ export function MatrixView({ panel, onSelectBid }: DisplayProps): JSX.Element {
     <div className="matrix">
       {/* Fixed label column (faces + held + expected). */}
       <div className="matrix-frozen">
-        <div className="matrix-corner" aria-hidden="true">
-          ≥
-        </div>
+        {onInfo ? (
+          <button
+            type="button"
+            className="matrix-corner matrix-info"
+            onClick={onInfo}
+            aria-label="Bid and probability — what do these mean?"
+            title="What do these mean?"
+          >
+            <span className="mx-axis-bid">
+              <span className="mx-axis-bid-label">bid</span>
+              <InfoIcon />
+            </span>
+            <span className="mx-axis-prob">probability</span>
+          </button>
+        ) : (
+          <div className="matrix-corner" aria-hidden="true">
+            ≥
+          </div>
+        )}
         {panel.rows.map((row) => (
           <div className="matrix-rowhead" key={row.group.faces.join(',')}>
             <span className="matrix-rowlabel">{groupLabel(row.group)}</span>
@@ -101,5 +119,15 @@ export function MatrixView({ panel, onSelectBid }: DisplayProps): JSX.Element {
         </div>
       </div>
     </div>
+  )
+}
+
+function InfoIcon(): JSX.Element {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <circle cx="12" cy="8" r="1.3" fill="currentColor" />
+      <path d="M12 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   )
 }

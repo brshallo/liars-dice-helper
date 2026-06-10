@@ -1,8 +1,29 @@
 import type { JSX } from 'react'
 import { FACES, type Face } from '../../lib/types'
 import { useGame, useGameDispatch } from '../../state/GameContext'
-import { FACE_PIPS } from '../../ui/format'
 import './Controls.css'
+
+// Pip positions on a 3×3 grid (indices 0–8), per face value.
+const PIP_GRID: Record<Face, number[]> = {
+  1: [4],
+  2: [0, 8],
+  3: [0, 4, 8],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+}
+
+/** A real-looking die face: a 3×3 grid of pips drawn in CSS. */
+function DieFace({ face }: { face: Face }): JSX.Element {
+  const on = new Set(PIP_GRID[face])
+  return (
+    <span className="die-face" role="img" aria-label={`face ${face}`}>
+      {Array.from({ length: 9 }, (_, i) => (
+        <span key={i} className={on.has(i) ? 'pip' : 'pip pip-off'} />
+      ))}
+    </span>
+  )
+}
 
 /**
  * Optional entry of the user's own dice. Knowing your dice sharpens every
@@ -40,9 +61,7 @@ export function YourDice(): JSX.Element {
           const count = game.heldByFace[face]
           return (
             <div className="face-stepper" key={face}>
-              <span className="face-pip" aria-label={`face ${face}`}>
-                {FACE_PIPS[face]}
-              </span>
+              <DieFace face={face} />
               <button onClick={() => set(face, count - 1)} disabled={count <= 0} aria-label={`fewer ${face}s`}>
                 −
               </button>

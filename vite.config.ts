@@ -50,11 +50,11 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: "Liar's Dice Helper",
-        short_name: "Liar's Dice",
-        description: "Live probability helper for Liar's Dice (no wilds).",
-        theme_color: '#0e1419',
-        background_color: '#0e1419',
+        name: "Cheating Liar's Dice",
+        short_name: "Cheating Dice",
+        description: "Cheating Liar's Dice — track each player's dice and see the live probability that any bid is true.",
+        theme_color: '#f4f1ea',
+        background_color: '#f4f1ea',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
@@ -64,6 +64,11 @@ export default defineConfig({
       },
     }),
   ],
+  // Expose the dev server on the local network (0.0.0.0) so phones on the same
+  // Wi-Fi can open it via the Mac's LAN IP — no tunnel, nothing leaves the network.
+  server: {
+    host: true,
+  },
   test: {
     environment: 'jsdom',
     globals: true,

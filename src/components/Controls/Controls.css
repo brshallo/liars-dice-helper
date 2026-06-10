@@ -38,14 +38,15 @@
 }
 
 button.primary {
-  background: var(--accent-dim);
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--text);
+  color: #fff;
   font-weight: 650;
   padding: 8px 14px;
 }
 button.primary:hover {
-  background: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
 }
 
 /* New game dialog form */
@@ -84,8 +85,8 @@ button.primary:hover {
   border-left: 1px solid var(--border);
 }
 .seg button.active {
-  background: var(--accent-dim);
-  color: var(--text);
+  background: var(--accent);
+  color: #fff;
 }
 .variant-note {
   font-size: 0.82rem;
@@ -128,15 +129,36 @@ button.link {
 .face-stepper {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 5px 7px;
 }
-.face-stepper .face-pip {
-  font-size: 1.4rem;
-  line-height: 1;
+/* CSS die face: a 3×3 grid of pips on a white tile with a thin ink ring. */
+.face-stepper .die-face {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1.5px solid var(--text);
+  border-radius: 7px;
+}
+.face-stepper .pip {
+  align-self: center;
+  justify-self: center;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text);
+}
+.face-stepper .pip-off {
+  visibility: hidden;
 }
 .face-stepper button {
   width: 28px;

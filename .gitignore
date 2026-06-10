@@ -35,6 +35,9 @@ synth-*.png
 ocv-*.png
 lab-*.png
 tmp-*.png
+ed-*.png
+rev-*.png
+mock-*.png
 
 # Third-party test images (not redistributed)
 src/capture/bench/samples/*.jpg

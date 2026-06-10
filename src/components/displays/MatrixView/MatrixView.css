@@ -1,5 +1,7 @@
 .matrix {
-  --head-h: 20px;
+  /* Header band is tall enough to hold the stacked BID / Probability legend; both
+     panes use this var, so the frozen + scrolling rows stay perfectly aligned. */
+  --head-h: 34px;
   --row-h: 34px;
   display: flex;
   align-items: stretch;
@@ -15,7 +17,7 @@
   gap: 3px;
   padding-right: 8px;
   background: var(--surface);
-  box-shadow: 3px 0 5px -2px rgba(0, 0, 0, 0.45);
+  box-shadow: 3px 0 5px -2px rgba(40, 30, 10, 0.18);
   z-index: 1;
 }
 
@@ -31,19 +33,86 @@
   align-items: stretch;
 }
 
-/* Header cells (corner + quantities) */
+/* Header cells (corner + quantities). Quantities sit at the bottom of the band,
+   just above the cells, so they line up with the legend's PROBABILITY rule. */
 .matrix-corner,
 .matrix-qhead {
   height: var(--head-h);
   display: grid;
-  place-items: center;
+  place-items: end center;
+  padding-bottom: 5px;
   font-size: 0.8rem;
-  color: var(--text-dim);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.matrix-corner {
-  justify-items: end;
-  padding-right: 2px;
+/* Thin rule under the bid quantities (echoes the BID | probability divide). */
+.matrix-qhead {
+  border-bottom: 1px solid var(--border);
+}
+
+/* The corner is the info button AND a legend for the two axes: BID quantities on
+   top, PROBABILITY cells below, split by a hairline (matching the table-of-data feel). */
+.matrix-info {
+  display: flex;
+  flex-direction: column;
+  align-self: start; /* shrink to the legend's own width, don't fill the column */
+  align-items: stretch; /* both rows share that width so the (i) can sit flush-right */
+  justify-content: flex-end;
+  gap: 0;
+  padding: 0 8px 5px 2px; /* small left pad so the "B" isn't clipped */
+  text-align: left; /* <button> defaults to center; force left */
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.matrix-info:hover {
+  background: none;
+  color: var(--accent);
+}
+/* BID row above PROBABILITY. The (i) is pinned to the right while the "bid"
+   label stays centered — a 3-column grid (icon-width gutter | label | icon)
+   keeps the label optically centred against the boxed PROBABILITY below it. */
+.mx-axis-bid {
+  display: grid;
+  grid-template-columns: 11px 1fr 11px;
+  align-items: center;
+  font-size: 0.52rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0.6;
+  /* divider between BID and the PROBABILITY box — replaces 1px of the existing
+     padding so it adds no height; the box hangs directly off this line. */
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border);
+}
+.mx-axis-bid-label {
+  grid-column: 2;
+  text-align: center;
+}
+.mx-axis-bid svg {
+  grid-column: 3;
+  justify-self: end;
+  display: block;
+  width: 11px;
+  height: 11px;
+}
+/* Boxed like a probability cell. Its top edge is the BID divider above (no top
+   border) so there's a single clean separating line, not a double rule. */
+.mx-axis-prob {
+  text-align: center;
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0.85;
+  padding: 2px 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  white-space: nowrap;
 }
 
 /* Row label (frozen pane) */
@@ -62,8 +131,8 @@
 .matrix-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--bg);
-  background: var(--accent);
+  color: #fff;
+  background: var(--held); /* blue: dice you hold, not a probability */
   border-radius: var(--radius-sm);
   padding: 1px 5px;
   line-height: 1.3;
