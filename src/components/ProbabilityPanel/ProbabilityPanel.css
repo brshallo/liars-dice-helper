@@ -58,16 +58,40 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
-.info-ex-corner,
+/* Quantity headers: ink, with a rule beneath — exactly like the live matrix. */
 .info-ex-qhead {
   text-align: center;
+  align-self: end;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
   font-size: 0.72rem;
-  color: var(--text-dim);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
+/* Corner mirrors the matrix legend: BID over a rule over PROBABILITY. */
 .info-ex-corner {
-  text-align: right;
-  padding-right: 4px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-right: 6px;
+}
+.info-ex-bid,
+.info-ex-prob {
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--text-dim);
+}
+.info-ex-bid {
+  opacity: 0.6;
+  padding-bottom: 3px;
+}
+.info-ex-prob {
+  opacity: 0.85;
+  padding-top: 3px;
+  border-top: 1px solid var(--border);
 }
 .info-ex-label {
   display: flex;

@@ -87,7 +87,8 @@ function InfoContent(): JSX.Element {
         style={{ gridTemplateColumns: `auto repeat(${exampleQ.length}, 1fr)` }}
       >
         <div className="info-ex-corner" aria-hidden="true">
-          ≥
+          <span className="info-ex-bid">bid</span>
+          <span className="info-ex-prob">probability</span>
         </div>
         {exampleQ.map((q) => (
           <div className="info-ex-qhead" key={q}>
