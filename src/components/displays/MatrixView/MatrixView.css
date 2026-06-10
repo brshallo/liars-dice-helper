@@ -1,5 +1,7 @@
 .matrix {
-  --head-h: 20px;
+  /* Header band is tall enough to hold the stacked BID / Probability legend; both
+     panes use this var, so the frozen + scrolling rows stay perfectly aligned. */
+  --head-h: 34px;
   --row-h: 34px;
   display: flex;
   align-items: stretch;
@@ -15,7 +17,7 @@
   gap: 3px;
   padding-right: 8px;
   background: var(--surface);
-  box-shadow: 3px 0 5px -2px rgba(0, 0, 0, 0.45);
+  box-shadow: 3px 0 5px -2px rgba(40, 30, 10, 0.18);
   z-index: 1;
 }
 
@@ -31,30 +33,28 @@
   align-items: stretch;
 }
 
-/* Header cells (corner + quantities) */
+/* Header cells (corner + quantities). Quantities sit at the bottom of the band,
+   just above the cells, so they line up with the legend's PROBABILITY rule. */
 .matrix-corner,
 .matrix-qhead {
   height: var(--head-h);
   display: grid;
-  place-items: center;
+  place-items: end center;
+  padding-bottom: 4px;
   font-size: 0.8rem;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
-.matrix-corner {
-  justify-items: end;
-  padding-right: 2px;
-}
 
-/* The corner doubles as the info button: a small "probability" label + the (i),
-   tucked in the top-left. Small font + overflow-hidden keep it from widening the
-   frozen faces column into the bid cells. */
+/* The corner is the info button AND a legend for the two axes: BID quantities on
+   top, PROBABILITY cells below, split by a hairline (matching the table-of-data feel). */
 .matrix-info {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
-  padding: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 0;
+  padding: 0 6px 0 0;
   overflow: hidden;
   background: none;
   border: none;
@@ -65,15 +65,31 @@
   background: none;
   color: var(--accent);
 }
-.matrix-info-label {
-  font-size: 0.6rem;
+.mx-axis-bid {
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   line-height: 1;
+  opacity: 0.6;
+  padding-bottom: 4px;
+}
+.mx-axis-prob {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.52rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding-top: 4px;
+  opacity: 0.85;
+  border-top: 1px solid var(--border);
   white-space: nowrap;
 }
-.matrix-info svg {
+.mx-axis-prob svg {
   display: block;
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
   flex: none;
 }
 

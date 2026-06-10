@@ -1,32 +1,33 @@
 :root {
-  /* Dark "felt table" palette. These are the default ("Classic") theme tokens;
-     a [data-theme] block (see themes.css on the themes branch) can override any of
-     them. Defaults here are unchanged, so the app looks identical without a theme. */
-  --bg: #0e1419;
-  --bg-glow: #16202b; /* top-of-page radial highlight behind everything */
-  --surface: #18202a;
-  --surface-2: #212c38;
-  --surface-3: #2b3845;
-  --border: #34424f;
-  --text: #e7eef5;
-  --text-dim: #9bacba;
-  --accent: #3fb8af;
-  --accent-dim: #2c7d77;
-  --warn: #e8b04b;
-  --danger: #e0584f;
-  --good: #4fb477;
+  /* Modern Editorial palette: warm paper, ink, one vivid vermilion accent.
+     Big Instrument Serif display + Hanken Grotesk body. */
+  --bg: #f4f1ea; /* paper page */
+  --bg-glow: #fbf9f3; /* faint warm highlight up top */
+  --surface: #ffffff; /* cards: probability band, your dice, modals */
+  --surface-2: #f1ece1; /* secondary chips: steppers, default buttons */
+  --surface-3: #e6dfd0; /* hover / pressed */
+  --border: #ddd7ca; /* hairline rules */
+  --text: #18160f; /* ink */
+  --text-dim: #6f685c; /* muted */
+  --accent: #e4391f; /* vermilion */
+  --accent-dim: #c0301a; /* deeper vermilion (glows, active) */
+  --warn: #d99a2e; /* ochre (1s-wild badge) */
+  --danger: #c0392b; /* OUT chips */
+  --good: #3f8f5a;
 
-  /* Felt table gradient stops (PlayerTable) — tokenized so a theme can retint the table. */
-  --felt-center: #1f6b4a;
-  --felt-mid: #15523a;
-  --felt-edge: #0e3a29;
+  /* The "table" reads as a clean white disc on the paper page. */
+  --felt-center: #ffffff;
+  --felt-mid: #fbfaf7;
+  --felt-edge: #f3f0e9;
+  /* Centerpiece text sits on the white table, so it must be ink, not white. */
+  --felt-text: #18160f;
 
-  /* Readable text colour for the filled "1s wild" badge. */
-  --badge-wild-text: #10161c;
+  /* Readable text colour for the filled "1s wild" badge (dark on ochre). */
+  --badge-wild-text: #18160f;
 
-  /* Typography — a theme can swap in a serif/mono/branded face. */
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: var(--font-body);
+  /* Typography. */
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
 
   --radius: 10px;
   --radius-sm: 6px;

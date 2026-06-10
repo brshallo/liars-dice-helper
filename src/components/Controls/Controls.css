@@ -38,14 +38,15 @@
 }
 
 button.primary {
-  background: var(--accent-dim);
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--text);
+  color: #fff;
   font-weight: 650;
   padding: 8px 14px;
 }
 button.primary:hover {
-  background: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
 }
 
 /* New game dialog form */
@@ -84,8 +85,8 @@ button.primary:hover {
   border-left: 1px solid var(--border);
 }
 .seg button.active {
-  background: var(--accent-dim);
-  color: var(--text);
+  background: var(--accent);
+  color: #fff;
 }
 .variant-note {
   font-size: 0.82rem;

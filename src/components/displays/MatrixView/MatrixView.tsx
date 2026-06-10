@@ -50,11 +50,14 @@ export function MatrixView({ panel, onSelectBid, onInfo }: DisplayProps): JSX.El
             type="button"
             className="matrix-corner matrix-info"
             onClick={onInfo}
-            aria-label="Probability — what do these mean?"
+            aria-label="Bid and probability — what do these mean?"
             title="What do these mean?"
           >
-            <span className="matrix-info-label">probability</span>
-            <InfoIcon />
+            <span className="mx-axis-bid">bid</span>
+            <span className="mx-axis-prob">
+              probability
+              <InfoIcon />
+            </span>
           </button>
         ) : (
           <div className="matrix-corner" aria-hidden="true">
