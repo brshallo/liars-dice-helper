@@ -70,33 +70,48 @@
   background: none;
   color: var(--accent);
 }
-/* BID row carries the (i), above the divider — label left, (i) flush right. */
+/* BID row above PROBABILITY. The (i) is pinned to the right while the "bid"
+   label stays centered — a 3-column grid (icon-width gutter | label | icon)
+   keeps the label optically centred against the boxed PROBABILITY below it. */
 .mx-axis-bid {
-  display: flex;
+  display: grid;
+  grid-template-columns: 11px 1fr 11px;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
   font-size: 0.52rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   line-height: 1;
   opacity: 0.6;
-  padding-bottom: 4px;
+  /* divider between BID and the PROBABILITY box — replaces 1px of the existing
+     padding so it adds no height; the box hangs directly off this line. */
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border);
+}
+.mx-axis-bid-label {
+  grid-column: 2;
+  text-align: center;
 }
 .mx-axis-bid svg {
+  grid-column: 3;
+  justify-self: end;
   display: block;
   width: 11px;
   height: 11px;
-  flex: none;
 }
+/* Boxed like a probability cell. Its top edge is the BID divider above (no top
+   border) so there's a single clean separating line, not a double rule. */
 .mx-axis-prob {
+  text-align: center;
   font-size: 0.52rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1;
-  padding-top: 4px;
   opacity: 0.85;
-  border-top: 1px solid var(--border);
+  padding: 2px 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
   white-space: nowrap;
 }
 

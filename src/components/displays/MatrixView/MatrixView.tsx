@@ -54,7 +54,7 @@ export function MatrixView({ panel, onSelectBid, onInfo }: DisplayProps): JSX.El
             title="What do these mean?"
           >
             <span className="mx-axis-bid">
-              bid
+              <span className="mx-axis-bid-label">bid</span>
               <InfoIcon />
             </span>
             <span className="mx-axis-prob">probability</span>

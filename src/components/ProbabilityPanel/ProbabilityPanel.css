@@ -54,7 +54,7 @@
   gap: 3px;
   align-items: center;
   padding: 10px;
-  background: var(--surface-2);
+  background: var(--surface); /* white, like the live matrix card (not taupe) */
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
@@ -85,13 +85,20 @@
   color: var(--text-dim);
 }
 .info-ex-bid {
+  text-align: center;
   opacity: 0.6;
   padding-bottom: 3px;
+  border-bottom: 1px solid var(--border); /* divider; box hangs off it */
 }
+/* Boxed + centred, mirroring the matrix legend's PROBABILITY chip. */
 .info-ex-prob {
+  text-align: center;
   opacity: 0.85;
-  padding-top: 3px;
-  border-top: 1px solid var(--border);
+  padding: 2px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
 }
 .info-ex-label {
   display: flex;
@@ -143,6 +150,10 @@
   gap: 2px;
 }
 .info-bidcell-q {
+  align-self: stretch;
+  text-align: center;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border); /* the bid-quantity rule, like the matrix */
   font-size: 0.68rem;
   line-height: 1;
   color: var(--text-dim);
