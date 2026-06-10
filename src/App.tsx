@@ -26,7 +26,12 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-title">
-          <h1>Liar&apos;s Dice Cheat Sheet</h1>
+          <span className="app-eyebrow">Cheat Sheet</span>
+          <h1>
+            Liar&apos;s <em>Dice</em>
+          </h1>
+        </div>
+        <div className="app-actions">
           <button
             type="button"
             className={`variant-badge${isWild ? ' is-wild' : ''}`}
@@ -36,8 +41,8 @@ function App() {
           >
             {isWild ? '1s wild' : 'No wilds'}
           </button>
+          <NewGameButton />
         </div>
-        <NewGameButton />
       </header>
 
       <main className="app-main">

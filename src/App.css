@@ -9,7 +9,7 @@
 
 .app-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* bottom-align the wordmark with the badge + button */
   justify-content: space-between;
   gap: 10px;
   flex-wrap: nowrap;
@@ -18,15 +18,33 @@
 }
 .app-title {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0; /* allow the title group to shrink so New game stays on this line */
+  flex-direction: column;
+  line-height: 0.9;
+  min-width: 0;
+}
+.app-eyebrow {
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
 }
 .app-title h1 {
-  /* Sized to keep title + badge + New game on one line down to ~360px-wide phones. */
-  font-size: clamp(0.72rem, 0.5rem + 1.1vw, 1.5rem);
-  letter-spacing: -0.5px;
+  /* Big serif wordmark; scales down so it fits with the badge + button to ~360px. */
+  font-size: clamp(1.7rem, 1.25rem + 2.4vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: 0.2px;
   white-space: nowrap;
+}
+.app-title h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
 }
 .app-header .primary {
   flex: none;
@@ -37,24 +55,24 @@
 }
 
 /* Game-type badge — always visible so the variant is never ambiguous, and a tap
-   toggle so you can switch 1s-wild on/off mid-game. */
+   toggle so you can switch 1s-wild on/off mid-game. An outlined pill (editorial). */
 .variant-badge {
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
   color: var(--text-dim);
-  background: var(--surface-2);
+  background: transparent;
   border: 1px solid var(--border);
   cursor: pointer;
 }
 /* Keep the badge's own colours on hover (override the global button:hover). */
 .variant-badge:hover {
-  background: var(--surface-2);
-  border-color: var(--accent-dim);
-  color: var(--text);
+  background: transparent;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .variant-badge.is-wild {
   color: var(--badge-wild-text);
