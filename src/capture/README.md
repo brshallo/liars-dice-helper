@@ -22,6 +22,28 @@ matched the current UI during testing); that styling is fine — it's the **reco
 
 ---
 
+## 🔄 REOPENED (2026-06-10): greenfield attempt #2 — Claude vision API
+
+New engine in `src/capture/vision/` with its own page at **`/vision.html`** (Vite entry `vision`,
+excluded from the PWA precache like the other R&D entries). Completely independent of the failed
+local engines — none of their code is reused.
+
+**Approach:** photo → canvas-downscale to ≤1568px JPEG → Claude vision (`claude-opus-4-8`) via
+`@anthropic-ai/sdk` directly from the browser (`dangerouslyAllowBrowser` — the key is the user's
+own, pasted on-device, kept in localStorage). Structured output (zod schema) returns per-die
+`face`/`look`/`confidence`; the UI shows editable die chips plus a per-face tally.
+
+This clears the "don't reopen without a real-world-trained detector" bar: a frontier vision
+model is one. Tradeoffs accepted: needs network + an API key, ~a cent per photo, not offline.
+
+Capture is a **native camera still** (`<input capture="environment">`), not getUserMedia — so it
+works over plain-http LAN (`npm run dev`, no self-signed cert dance) and gets a full-res photo.
+
+**Status: built; pipeline verified end-to-end minus auth (browser→API CORS works; a fake key gets
+a clean "key rejected" error). Awaiting real-dice testing on-device.**
+
+---
+
 ## ▶ RESUME HERE — pick this up later & finalize the approach
 
 **Goal of the next session:** test the live capture with real dice, compare the engines, and decide:
