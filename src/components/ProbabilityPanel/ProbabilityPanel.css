@@ -93,8 +93,8 @@
 .info-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--bg);
-  background: var(--accent);
+  color: #fff;
+  background: var(--held); /* blue: dice you hold, matches the matrix badge */
   border-radius: var(--radius-sm);
   padding: 1px 5px;
   line-height: 1.3;

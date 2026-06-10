@@ -1,8 +1,11 @@
-# Liar's Dice Cheat Sheet
+# Cheating Liar's Dice
 
 A browser app (installable PWA) to assist while playing Liar's Dice: track every player's dice
 count around a table and see the live probability that a bid ("at least *q* of a face") is true —
 sharpened once you enter the dice in your own hand.
+
+> **Look:** "Modern Editorial" theme — warm paper, ink, one vermilion accent, Instrument Serif
+> display + Hanken Grotesk body. The visual system is fully tokenized in `src/index.css`.
 
 > **Status:** Built and working. Manual dice entry, the probability engine (no-wilds **and**
 > 1s-wild), the 2–10 player table, and the probability panel are all live, installable as a PWA.
@@ -12,7 +15,7 @@ sharpened once you enter the dice in your own hand.
 - **2–10 players, 1–10 dice each.** New game opens a dialog (players / dice / variant).
 - **Two variants, toggleable mid-game.** Tap the header badge to flip **No wilds ⇄ 1s wild**; all
   probabilities recompute. (1s-wild: 1s count as any face.)
-- **Poker-style table.** Players sit around an oval felt that scales from 2 to 10 without clipping.
+- **Poker-style table.** Players sit around a round table that scales from 2 to 10 without clipping.
   Drag your own seat to match where you sit; double-click a name to rename; +/- adjusts each
   player's dice; a player at 0 dice drops to a faded "OUT" chip.
 - **Your dice (optional).** Enter what you're holding to turn your dice into a guaranteed floor and

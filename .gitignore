@@ -30,3 +30,9 @@ dist-ssr
 .playwright-mcp/
 verify-*.png
 diag*.png
+ed-*.png
+rev-*.png
+mock-*.png
+
+# Large local datasets (e.g. the Kaggle d6-dice set used by the dice-capture branch)
+/data/

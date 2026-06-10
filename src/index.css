@@ -11,6 +11,8 @@
   --text-dim: #6f685c; /* muted */
   --accent: #e4391f; /* vermilion */
   --accent-dim: #c0301a; /* deeper vermilion (glows, active) */
+  --held: #2c6cab; /* dice-you-hold badge — deliberately a cool blue, OUTSIDE the
+                      red→green probability heat scale, so it never reads as a probability */
   --warn: #d99a2e; /* ochre (1s-wild badge) */
   --danger: #c0392b; /* OUT chips */
   --good: #3f8f5a;

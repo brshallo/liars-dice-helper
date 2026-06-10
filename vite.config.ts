@@ -12,11 +12,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: "Liar's Dice Cheat Sheet",
-        short_name: "Liar's Dice",
-        description: "Live probability for Liar's Dice — track each player's dice and see how likely a bid is true.",
-        theme_color: '#0e1419',
-        background_color: '#0e1419',
+        name: "Cheating Liar's Dice",
+        short_name: "Cheating Dice",
+        description: "Cheating Liar's Dice — track each player's dice and see the live probability that any bid is true.",
+        theme_color: '#f4f1ea',
+        background_color: '#f4f1ea',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

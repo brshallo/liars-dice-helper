@@ -58,8 +58,7 @@
   align-items: flex-start; /* hug the left edge — not centered */
   justify-content: flex-end;
   gap: 0;
-  padding: 0 8px 5px 0;
-  overflow: hidden;
+  padding: 0 8px 5px 2px; /* small left pad so the "B" isn't clipped */
   text-align: left; /* <button> defaults to center; force left */
   background: none;
   border: none;
@@ -70,7 +69,11 @@
   background: none;
   color: var(--accent);
 }
+/* BID row carries the (i), above the divider. */
 .mx-axis-bid {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.52rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -78,10 +81,13 @@
   opacity: 0.6;
   padding-bottom: 4px;
 }
+.mx-axis-bid svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
 .mx-axis-prob {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-size: 0.52rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -90,12 +96,6 @@
   opacity: 0.85;
   border-top: 1px solid var(--border);
   white-space: nowrap;
-}
-.mx-axis-prob svg {
-  display: block;
-  width: 11px;
-  height: 11px;
-  flex: none;
 }
 
 /* Row label (frozen pane) */
@@ -114,8 +114,8 @@
 .matrix-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--bg);
-  background: var(--accent);
+  color: #fff;
+  background: var(--held); /* blue: dice you hold, not a probability */
   border-radius: var(--radius-sm);
   padding: 1px 5px;
   line-height: 1.3;

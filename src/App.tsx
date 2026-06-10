@@ -26,7 +26,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-title">
-          <span className="app-eyebrow">Cheat Sheet</span>
+          <span className="app-eyebrow">Cheating</span>
           <h1>
             Liar&apos;s <em>Dice</em>
           </h1>
