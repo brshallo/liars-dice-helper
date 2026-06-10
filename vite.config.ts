@@ -26,6 +26,11 @@ export default defineConfig({
       },
     }),
   ],
+  // Expose the dev server on the local network (0.0.0.0) so phones on the same
+  // Wi-Fi can open it via the Mac's LAN IP — no tunnel, nothing leaves the network.
+  server: {
+    host: true,
+  },
   test: {
     environment: 'jsdom',
     globals: true,
