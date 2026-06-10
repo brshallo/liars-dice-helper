@@ -6,6 +6,22 @@ imports nothing here.
 
 ---
 
+## ⛔ OUTCOME: didn't work — branch set aside (2026-06-10)
+
+On-device testing with real dice (Samsung S23 + iPhone, over LAN HTTPS) — **none of the recognition
+approaches worked acceptably.** The classic-CV engines (hand-rolled pip-counting, OpenCV) and the
+two-stage CNN + live multi-frame fusion all failed on real dice/lighting/angles — not close to usable.
+
+**Decision:** parked. Manual entry stays the only capture path in the shipped app. Don't invest more
+here without a materially different approach (e.g. a properly trained object detector — YOLO/Roboflow —
+on a large, diverse, real-world dice dataset, accepting the heavier model + possible loss of offline).
+The "RESUME HERE" notes below are kept only as a record of what was tried.
+
+The main app and its **"Cheating Liar's Dice"** editorial look were merged into this branch (so the lab
+matched the current UI during testing); that styling is fine — it's the **recognition** that failed.
+
+---
+
 ## ▶ RESUME HERE — pick this up later & finalize the approach
 
 **Goal of the next session:** test the live capture with real dice, compare the engines, and decide:
