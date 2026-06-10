@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cheating Liar's Dice — phone preview</title>
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --panel: #161d26;
+        --border: #2b3845;
+        --text: #e7eef5;
+        --dim: #9bacba;
+        --accent: #3fb8af;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        background: radial-gradient(120% 100% at 50% 0%, #16202b 0%, var(--bg) 70%);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100%;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 14px 16px 6px;
+      }
+      .bar h1 {
+        font-size: 15px;
+        font-weight: 650;
+        margin: 0 6px 0 0;
+      }
+      .bar .dim { color: var(--dim); font-size: 12px; }
+      .devices { display: flex; gap: 6px; flex-wrap: wrap; }
+      .devices button {
+        font: inherit;
+        font-size: 12px;
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 5px 9px;
+        cursor: pointer;
+      }
+      .devices button.active {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .bar a { color: var(--accent); font-size: 12px; }
+
+      /* The scaler shrinks the whole phone to fit short windows without scrolling. */
+      .stage {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 8px 0 28px;
+        overflow: auto;
+      }
+      .scaler { transform-origin: top center; }
+
+      /* The phone: a dark bezel with a notch and a rounded screen holding the app. */
+      .phone {
+        position: relative;
+        background: #05080c;
+        border: 2px solid #2a3340;
+        border-radius: 44px;
+        padding: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #0e141b;
+      }
+      .notch {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 46%;
+        height: 26px;
+        background: #05080c;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+        z-index: 2;
+      }
+      .screen {
+        border-radius: 32px;
+        overflow: hidden;
+        background: #0e1419;
+        display: block;
+      }
+      .screen iframe {
+        border: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #0e1419;
+      }
+      .size-label { color: var(--dim); font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <h1>Phone preview</h1>
+      <div class="devices" id="devices"></div>
+      <span class="size-label" id="sizeLabel"></span>
+      <a href="/" target="_blank" rel="noopener">open full ↗</a>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="scaler" id="scaler">
+        <div class="phone" id="phone">
+          <div class="notch"></div>
+          <div class="screen" id="screen">
+            <iframe id="app" src="/" title="Cheating Liar's Dice"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Common device logical sizes (CSS px). Width drives the app's responsive layout.
+      const DEVICES = [
+        { name: 'iPhone SE', w: 375, h: 667 },
+        { name: 'iPhone 14', w: 390, h: 844 },
+        { name: 'iPhone 15 Pro Max', w: 430, h: 932 },
+        { name: 'Pixel 7', w: 412, h: 915 },
+        { name: 'Galaxy S20', w: 360, h: 800 },
+      ]
+
+      const screen = document.getElementById('screen')
+      const phone = document.getElementById('phone')
+      const scaler = document.getElementById('scaler')
+      const stage = document.getElementById('stage')
+      const sizeLabel = document.getElementById('sizeLabel')
+      const devicesEl = document.getElementById('devices')
+
+      let current = DEVICES[1] // default iPhone 14 (390x844)
+
+      function applyDevice(d) {
+        current = d
+        screen.style.width = d.w + 'px'
+        screen.style.height = d.h + 'px'
+        sizeLabel.textContent = `${d.w} × ${d.h}`
+        ;[...devicesEl.children].forEach((b, i) => b.classList.toggle('active', DEVICES[i] === d))
+        fit()
+      }
+
+      // Scale the phone down so its full height fits the window (never scale up past 1).
+      function fit() {
+        scaler.style.transform = 'scale(1)'
+        const phoneRect = phone.getBoundingClientRect()
+        const availH = stage.clientHeight - 16
+        const availW = stage.clientWidth - 16
+        const scale = Math.min(1, availH / phoneRect.height, availW / phoneRect.width)
+        scaler.style.transform = `scale(${scale})`
+      }
+
+      DEVICES.forEach((d) => {
+        const b = document.createElement('button')
+        b.textContent = d.name
+        b.onclick = () => applyDevice(d)
+        devicesEl.appendChild(b)
+      })
+
+      window.addEventListener('resize', fit)
+      applyDevice(current)
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/liars-dice-helper/sw.js', { scope: '/liars-dice-helper/' })})}

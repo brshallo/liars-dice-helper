@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Liar's Dice Helper">
+  <defs>
+    <linearGradient id="felt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f6f66" />
+      <stop offset="1" stop-color="#0e1419" />
+    </linearGradient>
+  </defs>
+  <!-- Full-bleed background so the icon survives maskable (circular) crops -->
+  <rect width="512" height="512" fill="url(#felt)" />
+  <!-- A single die, kept within the central safe zone -->
+  <g transform="translate(146 146)">
+    <rect width="220" height="220" rx="44" fill="#eef4f7" />
+    <g fill="#13202a">
+      <circle cx="62" cy="62" r="22" />
+      <circle cx="158" cy="62" r="22" />
+      <circle cx="110" cy="110" r="22" />
+      <circle cx="62" cy="158" r="22" />
+      <circle cx="158" cy="158" r="22" />
+    </g>
+  </g>
+</svg>
