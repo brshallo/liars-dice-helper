@@ -55,7 +55,8 @@
 .matrix-info {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* hug the left edge — not centered */
+  align-self: start; /* shrink to the legend's own width, don't fill the column */
+  align-items: stretch; /* both rows share that width so the (i) can sit flush-right */
   justify-content: flex-end;
   gap: 0;
   padding: 0 8px 5px 2px; /* small left pad so the "B" isn't clipped */
@@ -69,10 +70,11 @@
   background: none;
   color: var(--accent);
 }
-/* BID row carries the (i), above the divider. */
+/* BID row carries the (i), above the divider — label left, (i) flush right. */
 .mx-axis-bid {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
   font-size: 0.52rem;
   letter-spacing: 0.18em;
