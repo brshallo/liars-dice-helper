@@ -33,9 +33,9 @@
   gap: 8px;
 }
 .engine-tab.active {
-  background: var(--accent-dim);
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--text);
+  color: #fff;
 }
 
 /* Input buttons */
@@ -46,8 +46,9 @@
   align-items: center;
 }
 .primary {
-  background: var(--accent-dim);
+  background: var(--accent);
   border-color: var(--accent);
+  color: #fff;
 }
 .ghost {
   background: transparent;
